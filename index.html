@@ -185,19 +185,23 @@
             {n:'Dubrovnik',f:'🇭🇷'},{n:'Sarajevo',f:'🇧🇦'},{n:'Skopie',f:'🇲🇰'},{n:'Malta',f:'🇲🇹'}
         ];
         const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
-        const DATA_KEY = 'votos_viaje_4pibones_vFinal_2026'; 
+        // CLAVE ÚNICA PARA EVITAR DATOS CORRUPTOS ANTERIORES
+        const DATA_KEY = 'votos_viaje_4pibones_PRO_2026';
 
-        let state = {
-            votes: {Elo:{}, Abby:{}, Cris:{}, Ele:{}},
-            confirmed: {Elo:false, Abby:false, Cris:false, Ele:false}
-        };
-        let isDataLoaded = false;
+        let votes = {Elo:{}, Abby:{}, Cris:{}, Ele:{}};
+        let confirmed = {Elo:false, Abby:false, Cris:false, Ele:false};
+        
+        // VARIABLE MAESTRA DE ESTADO DE CARGA
+        let isFullyLoaded = false;
 
         async function syncToCloud() {
-            if (window.dataSdk && isDataLoaded) {
+            // SEGURIDAD: Solo se permite escribir si el SDK está y se han cargado los datos previos
+            if (window.dataSdk && isFullyLoaded) {
                 try {
-                    await window.dataSdk.set(DATA_KEY, state);
-                } catch (e) { console.error("Error al guardar:", e); }
+                    await window.dataSdk.set(DATA_KEY, { votes, confirmed });
+                } catch (e) {
+                    console.error("Fallo crítico al sincronizar:", e);
+                }
             }
         }
 
@@ -205,14 +209,18 @@
             if (window.dataSdk) {
                 try {
                     const cloudData = await window.dataSdk.get(DATA_KEY);
-                    if (cloudData && cloudData.votes) {
-                        state = cloudData;
+                    if (cloudData) {
+                        // Si existen datos en la nube, los priorizamos
+                        if (cloudData.votes) votes = cloudData.votes;
+                        if (cloudData.confirmed) confirmed = cloudData.confirmed;
                     }
-                    isDataLoaded = true; // Impedimos sobrescribir con datos vacíos antes de cargar
+                    // UNA VEZ CARGADOS, activamos la bandera para permitir el guardado
+                    isFullyLoaded = true;
                     renderAll();
-                } catch (e) { 
-                    console.error("Error al cargar:", e);
-                    isDataLoaded = true; // Aun con error, permitimos el flujo para no bloquear
+                } catch (e) {
+                    console.error("Fallo cargando datos:", e);
+                    // Si falla la carga, liberamos igualmente para permitir empezar de cero
+                    isFullyLoaded = true;
                 }
             }
         }
@@ -221,9 +229,10 @@
             const scores = {};
             DESTINATIONS.forEach(d => scores[d.n] = 0);
             TRAVELERS.forEach(t => {
-                if (state.confirmed[t]) {
-                    Object.entries(state.votes[t] || {}).forEach(([name, pts]) => {
-                        scores[name] = (scores[name] || 0) + pts;
+                // SOLO sumamos los puntos si la viajera ha pulsado "GUARDAR"
+                if (confirmed[t]) {
+                    Object.entries(votes[t] || {}).forEach(([n, p]) => {
+                        scores[n] = (scores[n] || 0) + p;
                     });
                 }
             });
@@ -236,47 +245,53 @@
         }
 
         async function handleVote(t, d, p) {
-            if (state.confirmed[t]) return;
-            
-            const tv = state.votes[t];
-            if(tv[d] === p) {
-                delete tv[d];
+            // Bloqueamos si el voto ya está confirmado/cerrado
+            if (confirmed[t]) return;
+
+            if(!votes[t]) votes[t] = {};
+            if(votes[t][d] === p) {
+                delete votes[t][d];
             } else {
-                Object.keys(tv).forEach(k => {
-                    if(tv[k] === p) delete tv[k];
+                Object.keys(votes[t]).forEach(k => {
+                    if(votes[t][k] === p) delete votes[t][k];
                 });
-                tv[d] = p;
+                votes[t][d] = p;
             }
+            
+            // GUARDADO AUTOMÁTICO DE BORRADOR
             await syncToCloud();
             renderAll();
         }
 
-        async function saveFinal(t) {
-            const count = Object.keys(state.votes[t] || {}).length;
-            if (count < 3) return alert("Por favor, asigna tus 3, 2 y 1 puntos antes de guardar.");
-            state.confirmed[t] = true;
-            await syncToCloud();
+        async function saveVotacion(t) {
+            const count = Object.keys(votes[t] || {}).length;
+            if (count < 3) {
+                alert("Debes asignar los 3, 2 y 1 puntos antes de cerrar tu votación.");
+                return;
+            }
+            confirmed[t] = true;
+            await syncToCloud(); // Este guardado 'oficializa' los puntos en el ranking
             renderAll();
         }
 
-        async function editAgain(t) {
-            state.confirmed[t] = false;
-            await syncToCloud();
+        async function modifyVotacion(t) {
+            confirmed[t] = false;
+            await syncToCloud(); // Quitamos la confirmación para editar
             renderAll();
         }
 
         function renderTraveler(t) {
             const container = document.getElementById(`voting-${t.toLowerCase()}`);
             if(!container) return;
-            const tv = state.votes[t] || {};
+            const tv = votes[t] || {};
             const used = Object.values(tv);
-            const isConfirmed = state.confirmed[t];
+            const isConfirmed = confirmed[t];
 
             container.innerHTML = `
-                <div class="bg-slate-900 rounded-xl border ${isConfirmed ? 'border-amber-500 shadow-lg' : 'border-slate-700'} overflow-hidden mb-4">
-                    <div class="${isConfirmed ? 'bg-amber-600' : 'bg-slate-700'} p-3 flex justify-between text-white font-bold">
+                <div class="bg-slate-900 rounded-xl border ${isConfirmed ? 'border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.2)]' : 'border-slate-700'} overflow-hidden mb-4 transition-all">
+                    <div class="${isConfirmed ? 'bg-amber-600' : 'bg-slate-700'} p-3 flex justify-between items-center font-bold text-white">
                         <span>${t}</span>
-                        ${isConfirmed ? '<span class="text-xs bg-amber-900 px-2 py-1 rounded">CERRADO</span>' : ''}
+                        ${isConfirmed ? '<span class="text-[10px] bg-amber-900 px-2 py-1 rounded">RECIBIDO</span>' : ''}
                     </div>
                     <div class="p-4 space-y-2 bg-slate-800 max-h-[350px] overflow-y-auto ${isConfirmed ? 'opacity-40' : ''}">
                         ${DESTINATIONS.map(d => {
@@ -296,10 +311,10 @@
                             </div>`;
                         }).join('')}
                     </div>
-                    <div class="p-3 bg-slate-900">
+                    <div class="p-3 bg-slate-900 flex">
                         ${!isConfirmed ? 
-                            `<button onclick="saveFinal('${t}')" class="w-full bg-amber-600 py-2 rounded-lg text-white font-bold hover:bg-amber-700">Guardar Votación</button>` :
-                            `<button onclick="editAgain('${t}')" class="w-full border border-slate-600 py-2 rounded-lg text-slate-400 font-bold hover:bg-slate-800">Modificar</button>`
+                            `<button onclick="saveVotacion('${t}')" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-sm shadow-lg transition-colors">Guardar Votación</button>` :
+                            `<button onclick="modifyVotacion('${t}')" class="flex-1 border border-slate-600 hover:bg-slate-800 text-slate-300 font-bold py-2 rounded-lg text-sm transition-colors">Modificar Votación</button>`
                         }
                     </div>
                 </div>`;
@@ -311,17 +326,22 @@
         }
 
         async function init() {
+            // 1. Cargamos primero lo que haya en la nube
             await loadFromCloud();
+            
+            // 2. Suscribimos a actualizaciones externas (otros dispositivos)
             if (window.dataSdk && window.dataSdk.onUpdate) {
                 window.dataSdk.onUpdate(DATA_KEY, (newData) => {
                     if(newData && newData.votes) {
-                        state = newData;
+                        votes = newData.votes;
+                        confirmed = newData.confirmed || {Elo:false, Abby:false, Cris:false, Ele:false};
                         renderAll();
                     }
                 });
             }
             renderAll();
         }
+
         init();
     </script>
 </body>
