@@ -1,104 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premio Destino de Vacaciones para 4 Pibones</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premio Destino de Vacaciones para 4 Pibones</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIGURACIÓN: Pega aquí tu URL de Firebase
-        const firebaseConfig = {
-            databaseURL: "AQUÍ_VA_TU_URL_DE_FIREBASE" 
-        };
+    // NOTA: Para que los votos se graben "de verdad" entre vosotras, 
+    // pega tu URL de Firebase aquí abajo. Si no, solo se guardarán en tu sesión.
+    const firebaseConfig = {
+        databaseURL: "TU_URL_DE_FIREBASE_AQUÍ" 
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const votesRef = ref(db, 'votos_pibones_2026');
+    const firebaseApp = initializeApp(firebaseConfig);
+    const db = getDatabase(firebaseApp);
+    const votesRef = ref(db, 'votos_viaje_2026');
 
-        onValue(votesRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                window.votes = data;
-                renderAllVoting();
-                renderRanking();
-            }
-        });
+    // Sincronización: carga los votos que hayan hecho las demás
+    onValue(votesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            window.votes = data;
+            if (typeof renderAllVoting === 'function') renderAllVoting();
+            if (typeof renderRanking === 'function') renderRanking();
+        }
+    });
 
-        window.saveVoteToCloud = (updatedVotes) => {
-            set(votesRef, updatedVotes);
-        };
-    </script>
+    // Función para grabar cada click en la nube
+    window.saveVoteToCloud = (updatedVotes) => {
+        set(votesRef, updatedVotes);
+    };
+  </script>
 
-    <style>
-        body { box-sizing: border-box; scroll-behavior: smooth; }
+  <style>
+        body { box-sizing: border-box; }
         * { font-family: 'Inter', sans-serif; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); } 50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.8); } }
         .winner-crown { animation: float 2s ease-in-out infinite, pulse-glow 2s ease-in-out infinite; }
-        .table-scroll td { white-space: normal !important; word-break: break-word; vertical-align: top; }
-        .dest-desc { display: block; margin-top: 4px; font-size: 0.75rem; color: #94a3b8; font-style: italic; line-height: 1.2; }
+        .vote-button { transition: all 0.2s ease; }
+        .vote-button:hover { transform: scale(1.1); }
+        .vote-button:active { transform: scale(0.95); }
+        .vote-button.selected { animation: pulse-glow 1s ease-in-out; }
+        .destination-card { transition: all 0.3s ease; }
+        .destination-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scroll::-webkit-scrollbar { height: 8px; }
+        .table-scroll::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
+        .table-scroll table td { white-space: normal !important; word-break: break-word; }
+        .table-scroll table td:first-child .text-xs.text-slate-500 { display: block; margin-top: 6px; color: #9ca3af; font-style: italic; line-height: 1.2; }
     </style>
-</head>
-<body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
-    <div id="app" class="w-full h-full overflow-auto">
-        
-        <header class="relative overflow-hidden text-white border-b-4 border-amber-500 py-12 md:py-20 text-center">
-            <div class="relative z-10 px-4 max-w-4xl mx-auto">
-                <div class="text-6xl mb-4">🏆</div>
-                <h1 class="text-3xl md:text-5xl font-black mb-6 uppercase tracking-tighter">Premio Destino para 4 Pibones</h1>
-                <p class="text-slate-400 max-w-2xl mx-auto mb-8">Elo, Abby, Cris y Ele: los votos se sincronizan automáticamente. ¡Elegid con sabiduría!</p>
-                <a href="#voting-section" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-8 py-4 rounded-full transition-all shadow-lg inline-block">IR A VOTAR ▼</a>
-            </div>
-        </header>
+ </head>
+ <body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  <div id="app" class="w-full h-full overflow-auto">
+   <header class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border-b-4 border-amber-500">
+    <div class="absolute inset-0 overflow-hidden opacity-10">
+     <div class="absolute top-10 left-10 text-4xl" style="animation: float 3s ease-in-out infinite;">🎯</div>
+     <div class="absolute top-20 right-10 text-3xl" style="animation: float 3s ease-in-out infinite;">🗺️</div>
+    </div>
+    <div class="relative z-10 px-4 py-16 text-center max-w-4xl mx-auto">
+     <div class="mb-6 text-5xl md:text-6xl">🏆</div>
+     <h1 class="text-3xl md:text-5xl font-bold mb-6">Premio Destino de Vacaciones para 4 Pibones</h1>
+     <p class="text-sm md:text-base text-slate-300 mb-8">Clicad en VER VUELO para acceder a los horarios. ¡Los votos se graban para todas!</p>
+     <a href="#voting-section" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-8 py-4 rounded-xl border-2 border-amber-400">📋 ¡Votar Ahora!</a>
+    </div>
+   </header>
 
-        <main class="px-4 py-12 max-w-7xl mx-auto">
-            <div class="bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700 mb-12">
-                <div class="bg-slate-900 px-6 py-4 border-b border-amber-500">
-                    <h2 class="text-xl font-bold flex items-center gap-2"><span>✈️</span> Vuelos y Precios (Madrid - 2 Jul)</h2>
-                </div>
-                <div class="table-scroll">
-                    <table class="w-full text-sm">
-                        <thead class="bg-slate-950 text-slate-400">
-                            <tr>
-                                <th class="px-4 py-4 text-left">Ciudad / Descripción</th>
-                                <th class="px-4 py-4 text-center">Vuelta</th>
-                                <th class="px-4 py-4 text-right">Precio/Pers</th>
-                                <th class="px-4 py-4 text-center">Reserva</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dest-table-body" class="divide-y divide-slate-700">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="mb-12 bg-slate-800 rounded-2xl overflow-hidden border border-slate-700 shadow-xl">
-                <iframe src="https://www.google.com/maps/d/embed?mid=1jdZa06yL7cAbi03SUmNc3t-NMBeznbM&ehbc=2E312F" width="100%" height="450" style="border:0;" allowfullscreen loading="lazy"></iframe>
-            </div>
-
-            <div id="voting-section" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div id="voting-Elo"></div>
-                <div id="voting-Abby"></div>
-                <div id="voting-Cris"></div>
-                <div id="voting-Ele"></div>
-            </div>
-
-            <div class="bg-slate-900 rounded-2xl p-6 md:p-10 border-2 border-amber-500 shadow-2xl mb-20">
-                <h2 class="text-3xl font-black text-center mb-8 uppercase italic">🏆 Ranking de Pibones</h2>
-                <div id="ranking-container" class="space-y-4"></div>
-            </div>
-        </main>
+   <main class="px-4 py-12 max-w-7xl mx-auto">
+    <div class="bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700 mb-8">
+     <div class="table-scroll">
+      <table class="w-full text-sm">
+       <thead class="bg-slate-900 border-b-2 border-amber-500">
+        <tr class="text-slate-200">
+         <th class="px-4 py-4 text-left">Destino</th>
+         <th class="px-4 py-4 text-left">Salida</th>
+         <th class="px-4 py-4 text-left">Vuelta</th>
+         <th class="px-4 py-4 text-right">Precio/Pers</th>
+         <th class="px-4 py-4 text-center">Escala</th>
+         <th class="px-4 py-4 text-center">Reservar</th>
+        </tr>
+       </thead>
+       <tbody class="divide-y divide-slate-700">
+        </tbody>
+      </table>
+     </div>
     </div>
 
-    <script>
+    <div class="mb-8 bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
+        <iframe src="https://www.google.com/maps/d/embed?mid=1jdZa06yL7cAbi03SUmNc3t-NMBeznbM&ehbc=2E312F" width="100%" height="500" style="border:0;" allowfullscreen loading="lazy"></iframe>
+    </div>
+
+    <div id="voting-section" class="mt-12 bg-slate-800/50 rounded-2xl p-6 border border-slate-600 mb-8">
+     <h2 class="text-2xl font-bold text-center mb-6 text-slate-100 italic">🗳️ Repartid vuestros puntos (3, 2 y 1)</h2>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div id="voting-elo"></div>
+      <div id="voting-abby"></div>
+      <div id="voting-cris"></div>
+      <div id="voting-ele"></div>
+     </div>
+    </div>
+
+    <div class="mb-8 bg-slate-900 rounded-2xl shadow-2xl p-6 border-2 border-amber-500">
+     <h2 class="text-2xl font-bold text-center mb-6 text-white uppercase">🏆 Ranking de Pibones 2026</h2>
+     <div id="ranking-container" class="space-y-3"></div>
+    </div>
+   </main>
+  </div>
+
+  <script>
         const DESTINATIONS = [
-            { name: 'Belgrado', flag: '🇷🇸', country: 'Serbia', desc: 'En el corazón de los Balcanes, ideal para vida nocturna.', price: '165€', ret: '14 Jul', link: 'https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4' },
-            { name: 'Sofía', flag: '🇧🇬', country: 'Bulgaria', desc: 'Una de las capitales más antiguas, historia y montaña.', price: '138€', ret: '15 Jul', link: 'https://www.skyscanner.es/transport/vuelos/mad/sof/260702/260715/?adults=4' },
-            { name: 'Bucarest', flag: '🇷🇴', country: 'Rumanía', desc: 'El "París del Este", arquitectura brutal y barata.', price: '168€', ret: '14 Jul', link: 'https://www.skyscanner.es/transport/vuelos/mad/otp/260702/260714/?adults=4' },
-            { name: 'Tirana', flag: '🇦🇱', country: 'Albania', desc: 'Moderna, colorida y con playas espectaculares cerca.', price: '175€', ret: '14 Jul', link: 'https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4' },
-            { name: 'Cluj-Napoca', flag: '🇷🇴', country: 'Rumanía', desc: 'Capital de Transilvania, ambiente joven y universitario.', price: '192€', ret: '15 Jul', link: 'https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4'
+            { name: 'Belgrado', country: 'Serbia', flag: '🇷🇸', price: '165 €', out: '22:20 (2 Jul)', ret: '18:00 (14 Jul)', scale: 'Directo', link: 'https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4' },
+            { name: 'Sofía', country: 'Bulgaria', flag: '🇧🇬', price: '138 €', out: '20:30 (2 Jul)', ret: '16:55 (15 Jul)', scale: 'Directo', link: 'https://www.skyscanner.es/transport/vuelos/mad/sof/260702/260715/?adults=4' },
+            { name: 'Bucarest', country: 'Rumanía', flag: '🇷🇴', price: '168 €', out: '19:10 (2 Jul)', ret: '06:10 (14 Jul)', scale: 'Directo', link: 'https://www.skyscanner.es/transport/vuelos/mad/otp/260702/260714/?adults=4' },
+            { name: 'Tirana', country: 'Albania', flag: '🇦🇱', price: '175 €', out: '22:40 (2 Jul)', ret: '17:20 (14 Jul)', scale: 'Directo', link: 'https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4' },
+            { name: 'Cluj-Napoca', country: 'Rumanía', flag: '🇷🇴', price: '192 €', out: '20:50 (2 Jul)', ret: '06:10 (15 Jul)', scale: 'Directo', link: 'https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4' },
+            { name: 'Split', country: 'Croacia', flag: '🇭🇷', price: '225 €', out: '11:30 (2 Jul)', ret: '14:10 (14 Jul)', scale: '1h 05m', link: 'https://www.skyscanner.es/transport/vuelos/mad/spu/260702/260714/?adults=4' },
+            { name: 'Dubrovnik', country: 'Croacia', flag: '🇭🇷', price: '215 €', out: '11:30 (2 Jul)', ret: '06:15 (15 Jul)', scale: '35m', link: 'https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4' },
+            { name: 'Sarajevo', country: 'Bosnia', flag: '🇧🇦
