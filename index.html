@@ -186,13 +186,15 @@
         ];
         const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
         const DATA_KEY = 'votos_viaje_4pibones_2026_oficial';
+        
+        // Estado global
         let votes = {Elo:{}, Abby:{}, Cris:{}, Ele:{}};
-        // Estado de confirmación local y en nube
         let confirmed = {Elo:false, Abby:false, Cris:false, Ele:false};
 
+        // Función de sincronización total con la nube
         async function syncToCloud() {
             if (window.dataSdk) {
-                // Guardamos tanto los votos como el estado de confirmación
+                // Guardamos el paquete completo de datos
                 await window.dataSdk.set(DATA_KEY, { votes, confirmed });
             }
         }
@@ -201,6 +203,7 @@
             if (window.dataSdk) {
                 const cloudData = await window.dataSdk.get(DATA_KEY);
                 if (cloudData) {
+                    // Cargamos votos y confirmaciones
                     votes = cloudData.votes || votes;
                     confirmed = cloudData.confirmed || confirmed;
                     renderAll();
@@ -212,7 +215,7 @@
             const scores = {};
             DESTINATIONS.forEach(d => scores[d.n] = 0);
             TRAVELERS.forEach(t => {
-                // Solo sumamos los puntos si la viajera ha confirmado su voto
+                // El ranking SOLO acumula si la viajera ha confirmado
                 if (confirmed[t]) {
                     Object.entries(votes[t] || {}).forEach(([name, pts]) => {
                         scores[name] = (scores[name] || 0) + pts;
@@ -228,7 +231,7 @@
         }
 
         async function handleVote(t, d, p) {
-            if (confirmed[t]) return; // Si está guardado, no permite tocar puntos
+            if (confirmed[t]) return; 
             
             if(!votes[t]) votes[t] = {};
             if(votes[t][d] === p) {
@@ -239,25 +242,26 @@
                 });
                 votes[t][d] = p;
             }
-            // Solo renderizamos localmente, no sincronizamos a la nube hasta pulsar Guardar
+            
+            // Sincronizamos selecciones inmediatamente (auto-save)
+            await syncToCloud();
             renderAll();
         }
 
         async function saveVotes(t) {
             const userVotes = Object.keys(votes[t] || {}).length;
             if (userVotes < 3) {
-                alert("Por favor, asigna tus 3, 2 y 1 puntos antes de guardar.");
+                alert("Debes repartir los 3, 2 y 1 puntos antes de confirmar.");
                 return;
             }
             confirmed[t] = true;
-            await syncToCloud();
+            await syncToCloud(); // Guarda el estado confirmado
             renderAll();
         }
 
         async function editVotes(t) {
             confirmed[t] = false;
-            // Al modificar, quitamos la confirmación para que el ranking se actualice
-            await syncToCloud();
+            await syncToCloud(); // Libera el voto en la nube para que desaparezca del ranking
             renderAll();
         }
 
@@ -269,12 +273,12 @@
             const isConfirmed = confirmed[t];
 
             container.innerHTML = `
-                <div class="bg-slate-900 rounded-xl border ${isConfirmed ? 'border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'border-slate-700'} overflow-hidden mb-4 shadow-lg transition-all">
+                <div class="bg-slate-900 rounded-xl border ${isConfirmed ? 'border-amber-500 shadow-lg' : 'border-slate-700'} overflow-hidden mb-4 transition-all">
                     <div class="${isConfirmed ? 'bg-amber-600' : 'bg-slate-700'} p-3 flex justify-between items-center font-bold text-white text-lg">
                         <span>${t}</span>
-                        ${isConfirmed ? '<span class="text-xs bg-amber-900/50 px-2 py-1 rounded">VOTO CERRADO</span>' : ''}
+                        ${isConfirmed ? '<span class="text-[10px] bg-amber-900/50 px-2 py-1 rounded">RECIBIDO</span>' : ''}
                     </div>
-                    <div class="p-4 space-y-2 bg-slate-800 max-h-[350px] overflow-y-auto ${isConfirmed ? 'opacity-60' : ''}">
+                    <div class="p-4 space-y-2 bg-slate-800 max-h-[350px] overflow-y-auto ${isConfirmed ? 'opacity-40' : ''}">
                         ${DESTINATIONS.map(d => {
                             const cur = tv[d.n] || 0;
                             return `
@@ -285,7 +289,7 @@
                                         const sel = cur === p;
                                         const lock = !sel && used.includes(p);
                                         return `<button onclick="handleVote('${t}','${d.n}',${p})" 
-                                            class="w-8 h-8 rounded text-xs font-bold transition-all ${sel ? 'bg-amber-500 text-white shadow-lg' : lock ? 'bg-slate-700 text-slate-500' : 'bg-slate-800 text-slate-400 hover:border-amber-500'} ${isConfirmed ? 'cursor-not-allowed' : ''}" 
+                                            class="w-8 h-8 rounded text-xs font-bold transition-all ${sel ? 'bg-amber-500 text-white' : lock ? 'bg-slate-700 text-slate-500' : 'bg-slate-800 text-slate-400'} ${isConfirmed ? 'cursor-not-allowed' : ''}" 
                                             ${lock || isConfirmed ? 'disabled' : ''}>${p}</button>`;
                                     }).join('')}
                                 </div>
@@ -294,8 +298,8 @@
                     </div>
                     <div class="p-3 bg-slate-900 border-t border-slate-700 flex gap-2">
                         ${!isConfirmed ? 
-                            `<button onclick="saveVotes('${t}')" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-sm transition-colors shadow-lg">Guardar Votación</button>` :
-                            `<button onclick="editVotes('${t}')" class="flex-1 border border-slate-600 hover:bg-slate-800 text-slate-300 font-bold py-2 rounded-lg text-sm transition-colors">Modificar Votación</button>`
+                            `<button onclick="saveVotes('${t}')" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-sm transition-all">Guardar Votación</button>` :
+                            `<button onclick="editVotes('${t}')" class="flex-1 border border-slate-600 text-slate-400 py-2 rounded-lg text-sm hover:bg-slate-800 transition-all">Modificar Votación</button>`
                         }
                     </div>
                 </div>`;
@@ -307,7 +311,10 @@
         }
 
         async function init() {
+            // Esperamos a cargar los datos de la nube antes de nada
             await loadFromCloud();
+            
+            // Suscripción a cambios en tiempo real
             if (window.dataSdk && window.dataSdk.onUpdate) {
                 window.dataSdk.onUpdate(DATA_KEY, (newData) => {
                     if(newData) {
@@ -319,6 +326,7 @@
             }
             renderAll();
         }
+        
         init();
     </script>
 </body>
