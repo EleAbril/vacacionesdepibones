@@ -6,68 +6,198 @@
     <title>Premio Destino de Vacaciones para 4 Pibones</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/_sdk/element_sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        body { box-sizing: border-box; }
+        * { font-family: 'Inter', sans-serif; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); } 50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.8); } }
-        .winner-crown { animation: pulse-glow 2s ease-in-out infinite; border: 2px solid #fbbf24; }
+        .winner-crown { animation: float 2s ease-in-out infinite, pulse-glow 2s ease-in-out infinite; }
+        .vote-button { transition: all 0.2s ease; }
+        .vote-button:hover { transform: scale(1.1); }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scroll::-webkit-scrollbar { height: 8px; }
+        .table-scroll::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
+        .table-scroll table td { white-space: normal !important; word-break: break-word; }
+        .table-scroll table td:first-child .text-xs.text-slate-500 { display: block; margin-top: 6px; color: #9ca3af; font-style: italic; line-height: 1.2; }
+        .table-scroll table td:first-child .text-xs.text-slate-400 { display: block; margin-top: 2px; color: #94a3b8; }
     </style>
     <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
 </head>
-<body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-200">
-    <div id="app" class="w-full h-full overflow-auto pb-10">
-        <div id="status-bar" class="fixed top-0 right-0 m-4 z-50 px-3 py-1 rounded-full text-[10px] font-bold bg-red-900 text-red-200 border border-red-500">
-            Conectando...
-        </div>
-
-        <header class="relative px-4 py-16 text-center max-w-4xl mx-auto">
-            <div class="mb-4 text-6xl">🏆</div>
-            <h1 class="text-3xl md:text-5xl font-bold mb-4 text-white">Premio Destino de Vacaciones</h1>
-            <p class="text-slate-400">Cada viajera tiene 3, 2 y 1 puntos para repartir.</p>
+<body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div id="app" class="w-full h-full overflow-auto">
+        <header class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border-b-4 border-amber-500">
+            <div class="absolute inset-0 overflow-hidden opacity-10">
+                <div class="absolute top-10 left-10 text-4xl" style="animation: float 3s ease-in-out infinite;">🎯</div>
+                <div class="absolute top-20 right-10 text-3xl" style="animation: float 3s ease-in-out infinite; animation-delay: 0.5s;">🗺️</div>
+                <div class="absolute bottom-20 left-1/4 text-4xl" style="animation: float 3s ease-in-out infinite; animation-delay: 1s;">🌆</div>
+            </div>
+            <div class="relative z-10 px-4 py-16 text-center max-w-4xl mx-auto">
+                <div class="mb-6 text-5xl md:text-6xl">🏆</div>
+                <h1 class="text-3xl md:text-5xl font-bold mb-6 leading-tight">Premio Destino de Vacaciones para 4 Pibones</h1>
+                <p class="text-sm md:text-base text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">Clicad en VER VUELO para acceder directamente a los horarios y fechas seleccionados para las 4.</p>
+                <a href="#voting-section" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-xl border-2 border-amber-400">📋 ¡Votar Ahora! ▼</a>
+            </div>
         </header>
 
-        <main class="px-4 max-w-7xl mx-auto space-y-10">
-            <div id="voting-section" class="grid grid-cols-1 md:grid-cols-2 gap-6 scroll-mt-10">
-                <div id="voting-elo"></div>
-                <div id="voting-abby"></div>
-                <div id="voting-cris"></div>
-                <div id="voting-ele"></div>
+        <main class="px-4 py-12 max-w-7xl mx-auto">
+            <div class="bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700 mb-8">
+                <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-6 py-5 border-b border-amber-500 text-center font-bold text-white text-xl">🗺️ Tabla de Destinos</div>
+                <div class="table-scroll">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-900 border-b-2 border-amber-500 text-slate-200">
+                            <tr>
+                                <th class="px-4 py-4 text-left font-semibold">Destino</th>
+                                <th class="px-4 py-4 text-left font-semibold">Salida MAD</th>
+                                <th class="px-4 py-4 text-left font-semibold">Vuelta MAD</th>
+                                <th class="px-4 py-4 text-right font-semibold">Precio/Pers</th>
+                                <th class="px-4 py-4 text-right font-semibold">Hotel 4*</th>
+                                <th class="px-4 py-4 text-center font-semibold">Escala</th>
+                                <th class="px-4 py-4 text-center font-semibold">Reservar</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700 text-slate-200">
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇷🇸</span><div><div class="font-semibold text-slate-100">Belgrado</div><div class="text-xs text-slate-400">Serbia</div><div class="text-xs text-slate-500 mt-1 italic">En el corazón de los Balcanes, ideal para vida nocturna.</div></div></div></td>
+                                <td class="px-4 py-4">22:20<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">18:00<div class="text-xs text-slate-400">14 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">165 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">27,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-emerald-900 text-emerald-300 px-2 py-1 rounded-full text-xs">✓ Directo</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇧🇬</span><div><div class="font-semibold text-slate-100">Sofía</div><div class="text-xs text-slate-400">Bulgaria</div><div class="text-xs text-slate-500 mt-1 italic">Una de las capitales más antiguas, a los pies de la montaña Vitosha.</div></div></div></td>
+                                <td class="px-4 py-4">20:30<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">16:55<div class="text-xs text-slate-400">15 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">138 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">33,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-emerald-900 text-emerald-300 px-2 py-1 rounded-full text-xs">✓ Directo</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/sof/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇷🇴</span><div><div class="font-semibold text-slate-100">Bucarest</div><div class="text-xs text-slate-400">Rumanía</div><div class="text-xs text-slate-500 mt-1 italic">El "París del Este", con una arquitectura impresionante.</div></div></div></td>
+                                <td class="px-4 py-4">19:10<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">06:10<div class="text-xs text-slate-400">14 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">168 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">20,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-emerald-900 text-emerald-300 px-2 py-1 rounded-full text-xs">✓ Directo</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/otp/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇦🇱</span><div><div class="font-semibold text-slate-100">Tirana</div><div class="text-xs text-slate-400">Albania</div><div class="text-xs text-slate-500 mt-1 italic">Colorida, moderna y muy cerca de playas espectaculares.</div></div></div></td>
+                                <td class="px-4 py-4">22:40<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">17:20<div class="text-xs text-slate-400">14 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">175 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">25,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-emerald-900 text-emerald-300 px-2 py-1 rounded-full text-xs">✓ Directo</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇷🇴</span><div><div class="font-semibold text-slate-100">Cluj-Napoca</div><div class="text-xs text-slate-400">Rumanía</div><div class="text-xs text-slate-500 mt-1 italic">La capital de Transilvania, joven y universitaria.</div></div></div></td>
+                                <td class="px-4 py-4">20:50<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">06:10<div class="text-xs text-slate-400">15 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">192 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">20,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-emerald-900 text-emerald-300 px-2 py-1 rounded-full text-xs">✓ Directo</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇭🇷</span><div><div class="font-semibold text-slate-100">Split</div><div class="text-xs text-slate-400">Croacia</div><div class="text-xs text-slate-500 mt-1 italic">Ciudad costera vibrante construida alrededor de un palacio romano.</div></div></div></td>
+                                <td class="px-4 py-4">11:30<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">14:10<div class="text-xs text-slate-400">14 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">225 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">80,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-orange-900 text-orange-300 px-2 py-1 rounded-full text-xs">⊙ 1h 05m</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/spu/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇭🇷</span><div><div class="font-semibold text-slate-100">Dubrovnik</div><div class="text-xs text-slate-400">Croacia</div><div class="text-xs text-slate-500 mt-1 italic">"La Perla del Adriático", famosa por sus murallas y el mar.</div></div></div></td>
+                                <td class="px-4 py-4">11:30<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">06:15<div class="text-xs text-slate-400">15 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">215 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">95,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-orange-900 text-orange-300 px-2 py-1 rounded-full text-xs">⊙ 35m</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇧🇦</span><div><div class="font-semibold text-slate-100">Sarajevo</div><div class="text-xs text-slate-400">Bosnia</div><div class="text-xs text-slate-500 mt-1 italic">Cruce de culturas entre Oriente y Occidente.</div></div></div></td>
+                                <td class="px-4 py-4">06:05<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">12:10<div class="text-xs text-slate-400">14 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">240 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">21,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-orange-900 text-orange-300 px-2 py-1 rounded-full text-xs">⊙ 1h 20m</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/sjj/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇲🇰</span><div><div class="font-semibold text-slate-100">Skopie</div><div class="text-xs text-slate-400">Macedonia</div><div class="text-xs text-slate-500 mt-1 italic">Ciudad de estatuas y puentes históricos.</div></div></div></td>
+                                <td class="px-4 py-4">18:45<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">16:50<div class="text-xs text-slate-400">15 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">210 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">38,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-orange-900 text-orange-300 px-2 py-1 rounded-full text-xs">⊙ 2h 45m</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/skp/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                            <tr class="hover:bg-slate-700 transition-colors">
+                                <td class="px-4 py-4"><div class="flex items-center gap-3"><span class="text-2xl">🇲🇹</span><div><div class="font-semibold text-slate-100">Malta</div><div class="text-xs text-slate-400">Malta</div><div class="text-xs text-slate-500 mt-1 italic">Isla mediterránea completa con historia, sol y fiesta.</div></div></div></td>
+                                <td class="px-4 py-4">09:15<div class="text-xs text-slate-400">2 Jul</div></td>
+                                <td class="px-4 py-4">11:55<div class="text-xs text-slate-400">15 Jul</div></td>
+                                <td class="px-4 py-4 text-right font-bold text-amber-400">308 €</td>
+                                <td class="px-4 py-4 text-right text-slate-300">80,00 €</td>
+                                <td class="px-4 py-4 text-center"><span class="bg-emerald-900 text-emerald-300 px-2 py-1 rounded-full text-xs">✓ Directo</span></td>
+                                <td class="px-4 py-4 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/mla/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-2 rounded-lg text-xs text-white">Ver vuelo</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
-                <h2 class="text-2xl font-bold text-center text-white mb-6 underline decoration-amber-500">🏆 Ranking Oficial</h2>
+            <div class="mb-8 bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
+                <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-6 py-5 border-b border-amber-500 text-center text-white font-bold">🗺️ Mapa de los 10 Destinos</div>
+                <div class="w-full h-[450px]">
+                    <iframe src="https://www.google.com/maps/d/embed?mid=1jdZa06yL7cAbi03SUmNc3t-NMBeznbM&ehbc=2E312F" width="100%" height="450" style="border:0;" allowfullscreen loading="lazy"></iframe>
+                </div>
+            </div>
+
+            <div id="voting-section" class="mt-12 bg-slate-800 rounded-2xl p-6 border border-slate-600 mb-8 scroll-mt-8">
+                <h2 class="text-2xl font-bold text-center text-white mb-6">📋 Sistema de Votación (3, 2, 1 pts)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div id="voting-elo"></div>
+                    <div id="voting-abby"></div>
+                    <div id="voting-cris"></div>
+                    <div id="voting-ele"></div>
+                </div>
+            </div>
+
+            <div class="mb-8 bg-slate-800 rounded-2xl p-6 border-2 border-amber-500">
+                <h2 class="text-2xl font-bold text-center text-white mb-6">🏆 Ranking en Vivo</h2>
                 <div id="ranking-container" class="space-y-3"></div>
             </div>
         </main>
+        <footer class="bg-slate-950 text-white px-6 py-8 text-center border-t border-slate-800 font-semibold">Premio Destino de Vacaciones para 4 Pibones</footer>
     </div>
 
     <script>
-        const DATA_KEY = 'votos_oficiales_viaje_pibones_v3';
-        const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
         const DESTINATIONS = [
-            'Belgrado', 'Sofía', 'Bucarest', 'Tirana', 'Cluj-Napoca', 
-            'Split', 'Dubrovnik', 'Sarajevo', 'Skopie', 'Malta'
+            {n:'Belgrado',f:'🇷🇸'},{n:'Sofía',f:'🇧🇬'},{n:'Bucarest',f:'🇷🇴'},
+            {n:'Tirana',f:'🇦🇱'},{n:'Cluj-Napoca',f:'🇷🇴'},{n:'Split',f:'🇭🇷'},
+            {n:'Dubrovnik',f:'🇭🇷'},{n:'Sarajevo',f:'🇧🇦'},{n:'Skopie',f:'🇲🇰'},{n:'Malta',f:'🇲🇹'}
         ];
+        const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
+        const DATA_KEY = 'votos_viaje_4pibones_vFinal_2026'; 
 
         let state = {
-            votes: { Elo:{}, Abby:{}, Cris:{}, Ele:{} },
-            confirmed: { Elo:false, Abby:false, Cris:false, Ele:false }
+            votes: {Elo:{}, Abby:{}, Cris:{}, Ele:{}},
+            confirmed: {Elo:false, Abby:false, Cris:false, Ele:false}
         };
-        let isLoaded = false;
-
-        // --- SISTEMA DE DATOS ---
+        let isDataLoaded = false;
 
         async function syncToCloud() {
-            if (window.dataSdk && isLoaded) {
+            if (window.dataSdk && isDataLoaded) {
                 try {
                     await window.dataSdk.set(DATA_KEY, state);
-                    console.log("Datos guardados con éxito");
-                    updateStatus(true);
-                } catch (e) {
-                    console.error("Error al guardar:", e);
-                    updateStatus(false);
-                }
+                } catch (e) { console.error("Error al guardar:", e); }
             }
         }
 
@@ -77,128 +207,102 @@
                     const cloudData = await window.dataSdk.get(DATA_KEY);
                     if (cloudData && cloudData.votes) {
                         state = cloudData;
-                        console.log("Datos cargados correctamente");
                     }
-                    isLoaded = true; // Marcamos como cargado para permitir el guardado posterior
-                    updateStatus(true);
+                    isDataLoaded = true; // Impedimos sobrescribir con datos vacíos antes de cargar
                     renderAll();
-                } catch (e) {
+                } catch (e) { 
                     console.error("Error al cargar:", e);
-                    updateStatus(false);
+                    isDataLoaded = true; // Aun con error, permitimos el flujo para no bloquear
                 }
             }
         }
 
-        function updateStatus(online) {
-            const bar = document.getElementById('status-bar');
-            if (online) {
-                bar.innerText = "Sincronizado";
-                bar.className = "fixed top-0 right-0 m-4 z-50 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-900 text-emerald-200 border border-emerald-500";
-            } else {
-                bar.innerText = "Error de Conexión";
-                bar.className = "fixed top-0 right-0 m-4 z-50 px-3 py-1 rounded-full text-[10px] font-bold bg-red-900 text-red-200 border border-red-500";
-            }
+        function renderRanking() {
+            const scores = {};
+            DESTINATIONS.forEach(d => scores[d.n] = 0);
+            TRAVELERS.forEach(t => {
+                if (state.confirmed[t]) {
+                    Object.entries(state.votes[t] || {}).forEach(([name, pts]) => {
+                        scores[name] = (scores[name] || 0) + pts;
+                    });
+                }
+            });
+            const ranking = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+            document.getElementById('ranking-container').innerHTML = ranking.map(([n, p], i) => `
+                <div class="flex items-center justify-between p-4 rounded-xl ${i===0 && p>0 ? 'bg-amber-900 border-2 border-amber-500 winner-crown' : 'bg-slate-900'}">
+                    <span class="font-bold text-white text-lg">${i+1}. ${n}</span>
+                    <span class="font-bold text-amber-400 text-xl">${p} pts</span>
+                </div>`).join('');
         }
 
-        // --- LÓGICA DE INTERFAZ ---
-
-        async function handleVote(traveler, city, pts) {
-            if (state.confirmed[traveler]) return;
-
-            const tv = state.votes[traveler];
-            // Si ya tiene esos puntos en esa ciudad, los quita
-            if (tv[city] === pts) {
-                delete tv[city];
-            } else {
-                // Si esos puntos estaban en otra ciudad, los quita de allí primero
-                Object.keys(tv).forEach(c => { if (tv[c] === pts) delete tv[c]; });
-                tv[city] = pts;
-            }
+        async function handleVote(t, d, p) {
+            if (state.confirmed[t]) return;
             
-            // Auto-guardado temporal de la selección
-            await syncToCloud();
-            renderAll();
-        }
-
-        async function saveAction(traveler) {
-            const numVotes = Object.keys(state.votes[traveler]).length;
-            if (numVotes < 3) {
-                alert("Asigna tus 3, 2 y 1 puntos antes de guardar.");
-                return;
+            const tv = state.votes[t];
+            if(tv[d] === p) {
+                delete tv[d];
+            } else {
+                Object.keys(tv).forEach(k => {
+                    if(tv[k] === p) delete tv[k];
+                });
+                tv[d] = p;
             }
-            state.confirmed[traveler] = true;
             await syncToCloud();
             renderAll();
         }
 
-        async function modifyAction(traveler) {
-            state.confirmed[traveler] = false;
+        async function saveFinal(t) {
+            const count = Object.keys(state.votes[t] || {}).length;
+            if (count < 3) return alert("Por favor, asigna tus 3, 2 y 1 puntos antes de guardar.");
+            state.confirmed[t] = true;
+            await syncToCloud();
+            renderAll();
+        }
+
+        async function editAgain(t) {
+            state.confirmed[t] = false;
             await syncToCloud();
             renderAll();
         }
 
         function renderTraveler(t) {
             const container = document.getElementById(`voting-${t.toLowerCase()}`);
-            if (!container) return;
-            
+            if(!container) return;
+            const tv = state.votes[t] || {};
+            const used = Object.values(tv);
             const isConfirmed = state.confirmed[t];
-            const v = state.votes[t];
-            const usedPts = Object.values(v);
 
             container.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl border ${isConfirmed ? 'border-amber-500' : 'border-slate-700'} overflow-hidden shadow-xl transition-all">
-                    <div class="${isConfirmed ? 'bg-amber-600' : 'bg-slate-700'} p-4 flex justify-between items-center text-white font-bold">
-                        <span>Viajera: ${t}</span>
-                        ${isConfirmed ? '<span class="text-[10px] bg-amber-900 px-2 py-1 rounded">VOTO CERRADO</span>' : ''}
+                <div class="bg-slate-900 rounded-xl border ${isConfirmed ? 'border-amber-500 shadow-lg' : 'border-slate-700'} overflow-hidden mb-4">
+                    <div class="${isConfirmed ? 'bg-amber-600' : 'bg-slate-700'} p-3 flex justify-between text-white font-bold">
+                        <span>${t}</span>
+                        ${isConfirmed ? '<span class="text-xs bg-amber-900 px-2 py-1 rounded">CERRADO</span>' : ''}
                     </div>
-                    <div class="p-4 space-y-2 bg-slate-800/50 ${isConfirmed ? 'opacity-40' : ''}">
-                        ${DESTINATIONS.map(city => {
-                            const current = v[city] || 0;
+                    <div class="p-4 space-y-2 bg-slate-800 max-h-[350px] overflow-y-auto ${isConfirmed ? 'opacity-40' : ''}">
+                        ${DESTINATIONS.map(d => {
+                            const cur = tv[d.n] || 0;
                             return `
-                                <div class="flex items-center justify-between p-2 bg-slate-900 rounded-lg border border-slate-700">
-                                    <span class="text-sm font-medium">${city}</span>
-                                    <div class="flex gap-1">
-                                        ${[3, 2, 1].map(p => {
-                                            const active = current === p;
-                                            const disabled = !active && usedPts.includes(p);
-                                            return `
-                                                <button onclick="handleVote('${t}', '${city}', ${p})"
-                                                    ${(disabled || isConfirmed) ? 'disabled' : ''}
-                                                    class="w-8 h-8 rounded-md text-xs font-bold transition-all ${active ? 'bg-amber-500 text-white' : disabled ? 'bg-slate-800 text-slate-600' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
-                                                    ${p}
-                                                </button>`;
-                                        }).join('')}
-                                    </div>
-                                </div>`;
+                            <div class="flex items-center justify-between p-2 rounded bg-slate-900 border border-slate-700">
+                                <span class="text-xs text-white">${d.n}</span>
+                                <div class="flex gap-1">
+                                    ${[3, 2, 1].map(p => {
+                                        const sel = cur === p;
+                                        const lock = !sel && used.includes(p);
+                                        return `<button onclick="handleVote('${t}','${d.n}',${p})" 
+                                            class="w-8 h-8 rounded text-xs font-bold transition-all ${sel ? 'bg-amber-500 text-white' : lock ? 'bg-slate-700 text-slate-500' : 'bg-slate-800 text-slate-400'}" 
+                                            ${lock || isConfirmed ? 'disabled' : ''}>${p}</button>`;
+                                    }).join('')}
+                                </div>
+                            </div>`;
                         }).join('')}
                     </div>
-                    <div class="p-4 bg-slate-900 border-t border-slate-800">
+                    <div class="p-3 bg-slate-900">
                         ${!isConfirmed ? 
-                            `<button onclick="saveAction('${t}')" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-lg">Guardar Votación</button>` :
-                            `<button onclick="modifyAction('${t}')" class="w-full py-3 border border-slate-700 text-slate-400 hover:bg-slate-800 font-bold rounded-xl transition-all">Modificar Votos</button>`
+                            `<button onclick="saveFinal('${t}')" class="w-full bg-amber-600 py-2 rounded-lg text-white font-bold hover:bg-amber-700">Guardar Votación</button>` :
+                            `<button onclick="editAgain('${t}')" class="w-full border border-slate-600 py-2 rounded-lg text-slate-400 font-bold hover:bg-slate-800">Modificar</button>`
                         }
                     </div>
                 </div>`;
-        }
-
-        function renderRanking() {
-            const totals = {};
-            DESTINATIONS.forEach(d => totals[d] = 0);
-            TRAVELERS.forEach(t => {
-                if (state.confirmed[t]) {
-                    Object.entries(state.votes[t]).forEach(([city, pts]) => {
-                        totals[city] = (totals[city] || 0) + pts;
-                    });
-                }
-            });
-
-            const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
-            document.getElementById('ranking-container').innerHTML = sorted.map(([city, pts], i) => `
-                <div class="flex items-center justify-between p-4 rounded-xl ${i===0 && pts > 0 ? 'bg-amber-900/40 winner-crown' : 'bg-slate-900'} border border-slate-800">
-                    <span class="font-bold text-white">${i+1}. ${city}</span>
-                    <span class="font-black text-amber-500 text-xl">${pts} <span class="text-xs">pts</span></span>
-                </div>
-            `).join('');
         }
 
         function renderAll() {
@@ -206,34 +310,19 @@
             renderRanking();
         }
 
-        // --- INICIALIZACIÓN CRÍTICA ---
-
         async function init() {
-            // 1. Cargar primero de la nube
             await loadFromCloud();
-            
-            // 2. Escuchar cambios de otros dispositivos
             if (window.dataSdk && window.dataSdk.onUpdate) {
                 window.dataSdk.onUpdate(DATA_KEY, (newData) => {
-                    if (newData && newData.votes) {
+                    if(newData && newData.votes) {
                         state = newData;
                         renderAll();
                     }
                 });
             }
-
-            // 3. Render inicial
             renderAll();
         }
-
-        // Ejecutar cuando el SDK esté listo
-        if (window.dataSdk) {
-            init();
-        } else {
-            // Reintento si el SDK tarda en cargar
-            setTimeout(init, 1000);
-        }
-
+        init();
     </script>
 </body>
 </html>
