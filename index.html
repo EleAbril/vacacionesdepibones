@@ -8,17 +8,20 @@
     <script src="/_sdk/element_sdk.js"></script>
     <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <style>
         body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .table-scroll::-webkit-scrollbar { height: 6px; }
-        .table-scroll::-webkit-scrollbar-track { background: #1e293b; }
         .table-scroll::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
         .winner-crown { border: 2px solid #fbbf24 !important; box-shadow: 0 0 25px rgba(251, 191, 36, 0.3); }
-        .btn-vote { transition: all 0.2s ease; }
-        .btn-active { background-color: #fbbf24 !important; color: #0f172a !important; transform: scale(1.1); box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
-        .btn-locked { background-color: #1e293b !important; color: #475569 !important; cursor: not-allowed; }
-        .confirmed-overlay { opacity: 0.4; pointer-events: none; }
+        .btn-active { background-color: #fbbf24 !important; color: #0f172a !important; transform: scale(1.05); }
+        #map { height: 450px; border-radius: 1.5rem; border: 2px solid #334155; z-index: 10; }
+        .voter-card { transition: all 0.3s ease; }
+        .leaflet-popup-content-wrapper { background: #1e293b; color: #fff; border: 1px solid #fbbf24; }
+        .leaflet-popup-tip { background: #fbbf24; }
     </style>
 </head>
 <body class="h-full">
@@ -33,8 +36,16 @@
         </header>
 
         <main class="max-w-6xl mx-auto px-4 mt-10">
+            <div class="mb-12">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold uppercase italic tracking-tight text-amber-500">📍 Mapa de Destinos Candidatos</h2>
+                    <span class="text-[10px] text-slate-400 uppercase font-mono">2026 Interactive Travel Map</span>
+                </div>
+                <div id="map"></div>
+            </div>
+
             <div class="bg-slate-800 rounded-3xl border border-slate-700 shadow-2xl overflow-hidden mb-12">
-                <div class="bg-slate-700/50 p-4 border-b border-slate-600 font-bold text-center uppercase text-xs text-amber-500 italic">Itinerarios y Precios Reales de Skyscanner</div>
+                <div class="bg-slate-700/50 p-4 border-b border-slate-600 font-bold text-center uppercase text-xs text-amber-500">Información de Vuelos y Hoteles</div>
                 <div class="table-scroll">
                     <table class="w-full text-left">
                         <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase font-bold">
@@ -42,49 +53,63 @@
                                 <th class="p-5">Destino</th>
                                 <th class="p-5">Salida (MAD)</th>
                                 <th class="p-5">Vuelta (MAD)</th>
-                                <th class="p-5 text-right">Vuelo</th>
+                                <th class="p-5 text-right">Vuelo/pers</th>
                                 <th class="p-5 text-right">Hotel/Noche</th>
-                                <th class="p-5 text-center">Link</th>
+                                <th class="p-5 text-center">Enlace</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-700 text-slate-300">
-                            <tr><td class="p-5 font-bold text-white">🇷🇸 Belgrado</td><td class="p-5 text-xs">2 Jul 22:20</td><td class="p-5 text-xs">14 Jul 18:00</td><td class="p-5 text-right font-bold text-amber-400">165€</td><td class="p-5 text-right text-slate-400">27€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇧🇬 Sofía</td><td class="p-5 text-xs">2 Jul 20:30</td><td class="p-5 text-xs">15 Jul 16:55</td><td class="p-5 text-right font-bold text-amber-400">138€</td><td class="p-5 text-right text-slate-400">33€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/sof/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇷🇴 Bucarest</td><td class="p-5 text-xs">2 Jul 19:10</td><td class="p-5 text-xs">14 Jul 06:10</td><td class="p-5 text-right font-bold text-amber-400">168€</td><td class="p-5 text-right text-slate-400">20€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/otp/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇦🇱 Tirana</td><td class="p-5 text-xs">2 Jul 22:40</td><td class="p-5 text-xs">14 Jul 17:20</td><td class="p-5 text-right font-bold text-amber-400">175€</td><td class="p-5 text-right text-slate-400">25€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇷🇴 Cluj-Napoca</td><td class="p-5 text-xs">2 Jul 20:50</td><td class="p-5 text-xs">15 Jul 06:10</td><td class="p-5 text-right font-bold text-amber-400">192€</td><td class="p-5 text-right text-slate-400">20€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇭🇷 Split</td><td class="p-5 text-xs">2 Jul 11:30</td><td class="p-5 text-xs">14 Jul 14:10</td><td class="p-5 text-right font-bold text-amber-400">225€</td><td class="p-5 text-right text-slate-400">80€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/spu/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇭🇷 Dubrovnik</td><td class="p-5 text-xs">2 Jul 11:30</td><td class="p-5 text-xs">15 Jul 06:15</td><td class="p-5 text-right font-bold text-amber-400">215€</td><td class="p-5 text-right text-slate-400">95€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇧🇦 Sarajevo</td><td class="p-5 text-xs">2 Jul 06:05</td><td class="p-5 text-xs">14 Jul 12:10</td><td class="p-5 text-right font-bold text-amber-400">240€</td><td class="p-5 text-right text-slate-400">21€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/sjj/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇲🇰 Skopie</td><td class="p-5 text-xs">2 Jul 18:45</td><td class="p-5 text-xs">15 Jul 16:50</td><td class="p-5 text-right font-bold text-amber-400">210€</td><td class="p-5 text-right text-slate-400">38€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/skp/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
-                            <tr><td class="p-5 font-bold text-white">🇲🇹 Malta</td><td class="p-5 text-xs">2 Jul 09:15</td><td class="p-5 text-xs">15 Jul 11:55</td><td class="p-5 text-right font-bold text-amber-400">308€</td><td class="p-5 text-right text-slate-400">80€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/mla/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white hover:bg-amber-500">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇷🇸 Belgrado</td><td class="p-5 text-xs">2 Jul 22:20</td><td class="p-5 text-xs">14 Jul 18:00</td><td class="p-5 text-right font-bold text-amber-400">165€</td><td class="p-5 text-right">27,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇧🇬 Sofía</td><td class="p-5 text-xs">2 Jul 20:30</td><td class="p-5 text-xs">15 Jul 16:55</td><td class="p-5 text-right font-bold text-amber-400">138€</td><td class="p-5 text-right">33,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/sof/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇷🇴 Bucarest</td><td class="p-5 text-xs">2 Jul 19:10</td><td class="p-5 text-xs">14 Jul 06:10</td><td class="p-5 text-right font-bold text-amber-400">168€</td><td class="p-5 text-right">20,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/otp/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇦🇱 Tirana</td><td class="p-5 text-xs">2 Jul 22:40</td><td class="p-5 text-xs">14 Jul 17:20</td><td class="p-5 text-right font-bold text-amber-400">175€</td><td class="p-5 text-right">25,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇷🇴 Cluj-Napoca</td><td class="p-5 text-xs">2 Jul 20:50</td><td class="p-5 text-xs">15 Jul 06:10</td><td class="p-5 text-right font-bold text-amber-400">192€</td><td class="p-5 text-right">20,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇭🇷 Split</td><td class="p-5 text-xs">2 Jul 11:30</td><td class="p-5 text-xs">14 Jul 14:10</td><td class="p-5 text-right font-bold text-amber-400">225€</td><td class="p-5 text-right">80,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/spu/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇭🇷 Dubrovnik</td><td class="p-5 text-xs">2 Jul 11:30</td><td class="p-5 text-xs">15 Jul 06:15</td><td class="p-5 text-right font-bold text-amber-400">215€</td><td class="p-5 text-right">95,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇧🇦 Sarajevo</td><td class="p-5 text-xs">2 Jul 06:05</td><td class="p-5 text-xs">14 Jul 12:10</td><td class="p-5 text-right font-bold text-amber-400">240€</td><td class="p-5 text-right">21,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/sjj/260702/260714/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇲🇰 Skopie</td><td class="p-5 text-xs">2 Jul 18:45</td><td class="p-5 text-xs">15 Jul 16:50</td><td class="p-5 text-right font-bold text-amber-400">210€</td><td class="p-5 text-right">38,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/skp/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
+                            <tr><td class="p-5 font-bold text-white">🇲🇹 Malta</td><td class="p-5 text-xs">2 Jul 09:15</td><td class="p-5 text-xs">15 Jul 11:55</td><td class="p-5 text-right font-bold text-amber-400">308€</td><td class="p-5 text-right">80,00€</td><td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/mla/260702/260715/?adults=4" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold uppercase text-white">Ver vuelo</a></td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16" id="voters-grid">
-                <div id="card-Elo" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
-                <div id="card-Abby" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
-                <div id="card-Cris" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
-                <div id="card-Ele" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
+                <div id="voter-Elo" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
+                <div id="voter-Abby" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
+                <div id="voter-Cris" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
+                <div id="voter-Ele" class="voter-card bg-slate-800 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-xl"></div>
             </div>
 
             <div class="bg-slate-900 rounded-[40px] p-10 border-2 border-amber-500 shadow-2xl relative">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 px-6 py-1 rounded-full font-black text-xs uppercase italic tracking-widest">Ranking en Vivo</div>
-                <h2 class="text-3xl font-black text-center text-white mb-10 tracking-tight uppercase">🏆 Resultado Global</h2>
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 px-6 py-1 rounded-full font-black text-xs uppercase italic tracking-widest">Ranking en Tiempo Real</div>
+                <h2 class="text-3xl font-black text-center text-white mb-10 tracking-tight uppercase flex items-center justify-center gap-4">
+                    <span>🏆</span> RANKING ACTUAL
+                </h2>
                 <div id="ranking-list" class="space-y-4"></div>
             </div>
         </main>
     </div>
 
     <script>
-        const CITIES = ['Belgrado','Sofía','Bucarest','Tirana','Cluj-Napoca','Split','Dubrovnik','Sarajevo','Skopie','Malta'];
-        const USERS = ['Elo', 'Abby', 'Cris', 'Ele'];
-        const DATA_KEY = 'viaje_2026_TOTAL_FINAL_IRONCLAD';
+        const DESTINATIONS_DATA = [
+            {n:'Belgrado', c:[44.8176, 20.4633]},
+            {n:'Sofía', c:[42.6977, 23.3219]},
+            {n:'Bucarest', c:[44.4268, 26.1025]},
+            {n:'Tirana', c:[41.3275, 19.8187]},
+            {n:'Cluj-Napoca', c:[46.7712, 23.5916]},
+            {n:'Split', c:[43.5081, 16.4402]},
+            {n:'Dubrovnik', c:[42.6507, 18.0944]},
+            {n:'Sarajevo', c:[43.8563, 18.4131]},
+            {n:'Skopie', c:[41.9981, 21.4254]},
+            {n:'Malta', c:[35.8992, 14.5141]}
+        ];
+        const DESTINATIONS = DESTINATIONS_DATA.map(d => d.n);
+        const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
+        const DATA_KEY = 'viaje_2026_MAP_IRONCLAD_V1';
 
         let state = {
-            u: {
+            t: {
                 Elo: { v: {}, c: false, ts: 0 },
                 Abby: { v: {}, c: false, ts: 0 },
                 Cris: { v: {}, c: false, ts: 0 },
@@ -94,19 +119,19 @@
         };
 
         let isSaving = false;
-        let pending = false;
+        let pendingSave = false;
 
         function setStatus(s) {
             const dot = document.getElementById('status-dot');
             const txt = document.getElementById('status-text');
-            if(s === 'sync') { dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-spin"; txt.innerText = "Guardando..."; }
+            if(s === 'sync') { dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-spin"; txt.innerText = "Sincronizando..."; }
             else if(s === 'err') { dot.className = "w-2.5 h-2.5 rounded-full bg-red-600"; txt.innerText = "Error de Red"; }
             else { dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500"; txt.innerText = "Sincronizado"; }
         }
 
         async function push() {
             if(!window.dataSdk) return;
-            if(isSaving) { pending = true; return; }
+            if(isSaving) { pendingSave = true; return; }
             isSaving = true; setStatus('sync');
             try {
                 state.gv = Date.now();
@@ -115,47 +140,44 @@
             } catch(e) { setStatus('err'); }
             finally {
                 isSaving = false;
-                if(pending) { pending = false; push(); }
+                if(pendingSave) { pendingSave = false; push(); }
             }
         }
 
-        function merge(rem) {
-            if(!rem || rem.gv <= state.gv) return;
-            USERS.forEach(usr => {
-                if(rem.u[usr].ts > state.u[usr].ts) {
-                    state.u[usr] = rem.u[usr];
-                }
+        function merge(remote) {
+            if(!remote || remote.gv <= state.gv) return;
+            TRAVELERS.forEach(u => {
+                if(remote.t[u].ts > state.t[u].ts) { state.t[u] = remote.t[u]; }
             });
-            state.gv = rem.gv;
+            state.gv = remote.gv;
             render();
         }
 
         function render() {
-            // Render Tarjetas de Voto
-            USERS.forEach(usr => {
-                const card = document.getElementById(`card-${usr}`);
-                const data = state.u[usr];
-                const usedPts = Object.values(data.v);
+            TRAVELERS.forEach(u => {
+                const el = document.getElementById(`voter-${u}`);
+                const data = state.t[u];
+                const used = Object.values(data.v);
                 
-                card.innerHTML = `
+                el.innerHTML = `
                     <div class="px-6 py-4 flex justify-between items-center ${data.c ? 'bg-amber-600 text-slate-900' : 'bg-slate-700 text-white'} font-black italic uppercase tracking-tighter">
-                        <span>${usr}</span>
-                        ${data.c ? '<span class="text-[9px] bg-slate-900 text-white px-2 py-0.5 rounded font-bold not-italic">VOTO RECIBIDO</span>' : ''}
+                        <span>${u}</span>
+                        ${data.c ? '<span class="text-[9px] bg-slate-900 text-white px-2 py-0.5 rounded font-bold not-italic">LISTO</span>' : ''}
                     </div>
-                    <div class="p-6 space-y-3 ${data.c ? 'confirmed-overlay' : ''}">
-                        ${CITIES.map(city => {
-                            const current = data.v[city] || 0;
+                    <div class="p-6 space-y-3 ${data.c ? 'opacity-40 pointer-events-none' : ''}">
+                        ${DESTINATIONS.map(city => {
+                            const pts = data.v[city] || 0;
                             return `
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-bold text-slate-300">${city}</span>
                                     <div class="flex gap-1">
                                         ${[3, 2, 1].map(p => {
-                                            const active = current === p;
-                                            const disabled = !active && usedPts.includes(p);
+                                            const active = pts === p;
+                                            const disabled = !active && used.includes(p);
                                             return `
-                                                <button onclick="vote('${usr}','${city}',${p})" 
+                                                <button onclick="vote('${u}','${city}',${p})" 
                                                     ${disabled ? 'disabled' : ''}
-                                                    class="w-8 h-8 rounded-lg font-black text-xs btn-vote ${active ? 'btn-active' : disabled ? 'btn-locked' : 'bg-slate-700 text-slate-400 hover:text-white'}">
+                                                    class="w-9 h-9 rounded-xl font-black text-xs transition-all ${active ? 'btn-active' : disabled ? 'bg-slate-900 text-slate-700 cursor-not-allowed' : 'bg-slate-700 text-slate-400 hover:text-white'}">
                                                     ${p}
                                                 </button>
                                             `;
@@ -166,40 +188,38 @@
                         }).join('')}
                     </div>
                     <div class="p-4 bg-slate-900/50">
-                        <button onclick="toggle('${usr}')" class="w-full py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${data.c ? 'text-slate-500 border border-slate-700 hover:bg-slate-800' : 'bg-amber-600 text-white shadow-lg hover:bg-amber-500'}">
-                            ${data.c ? 'Modificar Votos' : 'Finalizar y Cerrar'}
+                        <button onclick="toggle('${u}')" class="w-full py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${data.c ? 'text-slate-500 border border-slate-700 hover:bg-slate-800' : 'bg-amber-600 text-white shadow-lg hover:bg-amber-500'}">
+                            ${data.c ? 'Modificar Votos' : 'Confirmar Selección'}
                         </button>
                     </div>
                 `;
             });
 
-            // Render Ranking
             const scores = {};
-            CITIES.forEach(c => scores[c] = 0);
-            USERS.forEach(usr => {
-                if(state.u[usr].c) {
-                    Object.entries(state.u[usr].v).forEach(([name, pts]) => scores[name] += pts);
+            DESTINATIONS.forEach(d => scores[d] = 0);
+            TRAVELERS.forEach(u => {
+                if(state.t[u].c) {
+                    Object.entries(state.t[u].v).forEach(([name, p]) => scores[name] += p);
                 }
             });
 
             const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
-            document.getElementById('ranking-list').innerHTML = sorted.map(([name, pts], i) => `
-                <div class="flex items-center justify-between p-6 rounded-3xl ${i===0 && pts > 0 ? 'winner-crown bg-amber-500/10' : 'bg-slate-800 border border-slate-700'}">
+            document.getElementById('ranking-list').innerHTML = sorted.map(([name, p], i) => `
+                <div class="flex items-center justify-between p-6 rounded-3xl ${i===0 && p > 0 ? 'winner-crown bg-amber-500/10' : 'bg-slate-800 border border-slate-700'} transition-all">
                     <div class="flex items-center gap-4">
                         <span class="text-3xl font-black ${i===0 ? 'text-amber-500' : 'text-slate-600'}">#${i+1}</span>
-                        <span class="font-bold text-white uppercase">${name}</span>
+                        <span class="font-bold text-white uppercase tracking-tight">${name}</span>
                     </div>
-                    <div class="text-3xl font-black text-amber-500 font-mono tracking-tighter">${pts} <span class="text-[10px] text-slate-500 italic">pts</span></div>
+                    <div class="text-3xl font-black text-amber-500 font-mono tracking-tighter">${p} <span class="text-[10px] text-slate-500 italic">PTS</span></div>
                 </div>
             `).join('');
         }
 
         async function vote(u, d, p) {
-            const user = state.u[u];
+            const user = state.t[u];
             if(user.c) return;
-            if(user.v[d] === p) {
-                delete user.v[d];
-            } else {
+            if(user.v[d] === p) { delete user.v[d]; }
+            else {
                 Object.keys(user.v).forEach(k => { if(user.v[k] === p) delete user.v[k]; });
                 user.v[d] = p;
             }
@@ -207,24 +227,36 @@
         }
 
         async function toggle(u) {
-            const user = state.u[u];
-            if(!user.c && Object.keys(user.v).length < 3) {
-                return alert("Por favor, asigna tus 3, 2 y 1 puntos antes de cerrar.");
-            }
+            const user = state.t[u];
+            if(!user.c && Object.keys(user.v).length < 3) return alert("Selecciona 3 favoritos (3, 2 y 1 pts) antes de confirmar.");
             user.c = !user.c; user.ts = Date.now(); render(); await push();
         }
 
+        // Inicialización del Mapa
+        function initMap() {
+            const map = L.map('map').setView([42.5, 18.0], 5);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(map);
+
+            DESTINATIONS_DATA.forEach(dest => {
+                L.marker(dest.c).addTo(map)
+                    .bindPopup(`<b style="color:#fbbf24; text-transform:uppercase;">${dest.n}</b><br><span style="font-size:10px;">Candidato Verano 2026</span>`);
+            });
+        }
+
         async function init() {
-            render(); // Dibujar estructura inmediata
-            let tries = 0;
-            while(!window.dataSdk && tries < 50) {
+            initMap();
+            render();
+            let attempts = 0;
+            while(!window.dataSdk && attempts < 50) {
                 await new Promise(r => setTimeout(r, 100));
-                tries++;
+                attempts++;
             }
             if(window.dataSdk) {
                 try {
                     const cloud = await window.dataSdk.get(DATA_KEY);
-                    if(cloud && cloud.u) { state = cloud; }
+                    if(cloud && cloud.t) state = cloud;
                 } catch(e) {}
                 if(window.dataSdk.onUpdate) {
                     window.dataSdk.onUpdate(DATA_KEY, (n) => { if(!isSaving) merge(n); });
@@ -232,6 +264,7 @@
             }
             render();
         }
+
         init();
     </script>
 </body>
