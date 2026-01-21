@@ -29,8 +29,8 @@
             </div>
             <div class="relative z-10 px-4 py-16 text-center max-w-4xl mx-auto">
                 <div class="mb-6 text-5xl md:text-6xl text-white">🏆</div>
-                <h1 class="text-3xl md:text-5xl font-bold mb-6 leading-tight">Premio Destino de Vacaciones para 4 Pibones</h1>
-                <p class="text-sm md:text-base text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">Clicad en VER VUELO para acceder directamente a los horarios y fechas seleccionados para las 4.</p>
+                <h1 class="text-3xl md:text-6xl font-black mb-4 uppercase italic tracking-tighter">Votación Verano 2026</h1>
+                <p class="text-amber-500 font-bold uppercase tracking-widest text-sm mb-8">Destino para 4 Pibones</p>
                 <div id="status-box" class="inline-flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-full border border-slate-700">
                     <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
                     <span id="status-text" class="text-[10px] font-mono text-slate-300 uppercase">Sincronizado</span>
@@ -58,7 +58,7 @@
                                 <td class="p-5 font-bold text-slate-100">🇷🇸 Belgrado</td>
                                 <td class="p-5 text-xs text-slate-400 font-medium">2 Jul 22:20</td>
                                 <td class="p-5 text-xs text-slate-400 font-medium">14 Jul 18:00</td>
-                                <td class="p-5 text-right font-black text-amber-400 font-mono">165€</td>
+                                <td class="p-5 text-right font-black text-amber-500 font-mono">165€</td>
                                 <td class="p-5 text-right font-medium text-slate-400 font-mono">27€</td>
                                 <td class="p-5 text-center"><a href="https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4" target="_blank" class="bg-amber-600 hover:bg-amber-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-black transition-colors uppercase font-mono tracking-tighter">Vuelo</a></td>
                             </tr>
@@ -157,7 +157,7 @@
             {n:'Split'},{n:'Dubrovnik'},{n:'Sarajevo'},{n:'Skopie'},{n:'Malta'}
         ];
         const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
-        const DATA_KEY = 'viaje_2026_final_v101'; // Nueva clave para empezar limpio
+        const DATA_KEY = 'viaje_2026_final_ironclad_V105'; 
 
         let state = {
             t: {
@@ -177,7 +177,7 @@
             const txt = document.getElementById('status-text');
             if(status === 'sync') { 
                 dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-spin"; 
-                txt.innerText = "Sincronizando..."; 
+                txt.innerText = "Guardando..."; 
             } else if(status === 'err') { 
                 dot.className = "w-2.5 h-2.5 rounded-full bg-red-600"; 
                 txt.innerText = "Error de Red"; 
@@ -215,7 +215,6 @@
         }
 
         function render() {
-            // Render Votantes
             document.getElementById('voters-grid').innerHTML = TRAVELERS.map(user => {
                 const data = state.t[user];
                 const used = Object.values(data.v);
@@ -257,7 +256,6 @@
                 `;
             }).join('');
 
-            // Render Ranking
             const scores = {};
             DESTINATIONS.forEach(d => scores[d.n] = 0);
             TRAVELERS.forEach(user => {
@@ -293,7 +291,7 @@
 
         async function toggle(u) {
             const user = state.t[u];
-            if(!user.c && Object.keys(user.v).length < 3) return alert("Selecciona tus 3 destinos favoritos (3, 2 y 1 punto) antes de confirmar.");
+            if(!user.c && Object.keys(user.v).length < 3) return alert("Selecciona tus 3 destinos favoritos antes de confirmar.");
             user.c = !user.c; 
             user.ts = Date.now(); 
             render(); 
