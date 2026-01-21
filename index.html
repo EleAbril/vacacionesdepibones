@@ -3,180 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Votación Verano 2026</title>
+    <title>Premio Destino de Vacaciones para 4 Pibones</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/_sdk/element_sdk.js"></script>
     <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .winner-crown { border: 2px solid #fbbf24 !important; box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); }
-        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .desc-text { display: block; margin-top: 4px; color: #9ca3af; font-style: italic; font-size: 0.75rem; line-height: 1.2; }
-        .btn-active { background-color: #fbbf24 !important; color: #0f172a !important; transform: scale(1.1); font-weight: 900; }
+        body {
+            box-sizing: border-box;
+            background-color: #0f172a;
+            color: #f1f5f9;
+            margin: 0;
+        }
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.8); }
+        }
+        
+        .winner-crown {
+            animation: float 2s ease-in-out infinite, pulse-glow 2s ease-in-out infinite;
+            border: 2px solid #fbbf24 !important;
+        }
+        
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-scroll::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #fbbf24;
+            border-radius: 10px;
+        }
+
+        .table-scroll table td {
+            white-space: normal !important;
+            word-break: break-word;
+        }
+
+        .desc-text {
+            display: block;
+            margin-top: 6px;
+            color: #9ca3af;
+            font-style: italic;
+            line-height: 1.2;
+            font-size: 0.75rem;
+        }
+
+        .vote-btn-active {
+            background-color: #fbbf24 !important;
+            color: #0f172a !important;
+            transform: scale(1.1);
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        .traveler-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
-<body class="h-full bg-slate-950">
-    <div id="app" class="max-w-7xl mx-auto px-4 py-12">
-        <header class="text-center mb-12 border-b-4 border-amber-500 pb-8">
-            <h1 class="text-3xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Viaje Pibones 2026</h1>
-            <div class="mt-4 inline-flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-full border border-slate-800">
-                <div id="status-dot" class="w-3 h-3 rounded-full bg-red-600 animate-pulse"></div>
-                <span id="status-text" class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Sin Conexión</span>
+<body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div id="app" class="w-full h-full overflow-auto pb-20">
+        <header class="relative border-b-4 border-amber-500 py-16 text-center">
+            <div class="absolute inset-0 overflow-hidden opacity-10">
+                <div class="absolute top-10 left-10 text-4xl" style="animation: float 3s ease-in-out infinite;">🎯</div>
+                <div class="absolute top-20 right-10 text-3xl" style="animation: float 3s ease-in-out infinite; animation-delay: 0.5s;">🗺️</div>
+                <div class="absolute bottom-20 left-1/4 text-4xl" style="animation: float 3s ease-in-out infinite; animation-delay: 1s;">🌆</div>
+            </div>
+            <div class="relative z-10 px-4">
+                <div class="mb-6 text-5xl md:text-6xl">🏆</div>
+                <h1 class="text-3xl md:text-5xl font-extrabold uppercase italic tracking-tighter text-white">Premio Destino de Vacaciones para 4 Pibones</h1>
+                <p class="text-slate-400 mt-4 max-w-2xl mx-auto italic">Clicad en VER VUELO para acceder directamente a los horarios y fechas seleccionados para las 4.</p>
+                <div id="sync-indicator" class="mt-8 inline-flex items-center gap-3 bg-slate-800 px-6 py-2 rounded-full border border-slate-700">
+                    <div id="status-dot" class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+                    <span id="status-text" class="text-xs font-mono text-slate-300 uppercase tracking-widest font-bold">Conectando...</span>
+                </div>
             </div>
         </header>
 
-        <div class="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 mb-12 shadow-2xl">
-            <div class="table-scroll">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-800 text-slate-400 uppercase text-[10px] font-bold">
-                        <tr><th class="p-5">Destino</th><th class="p-5 text-right">Precio</th><th class="p-5 text-center">Vuelo</th></tr>
-                    </thead>
-                    <tbody id="dest-body" class="divide-y divide-slate-800"></tbody>
-                </table>
+        <main class="px-4 py-12 max-w-7xl mx-auto">
+            <div class="bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700 mb-12">
+                <div class="bg-slate-900 px-6 py-5 border-b border-amber-500 text-center uppercase font-black italic text-amber-500 tracking-widest text-lg">
+                    🗺️ Listado Oficial de Destinos
+                </div>
+                <div class="table-scroll">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-900 text-slate-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left font-bold uppercase tracking-tighter border-r border-slate-800">Destino / Info</th>
+                                <th class="px-6 py-4 text-left font-bold uppercase tracking-tighter border-r border-slate-800">Salida MAD</th>
+                                <th class="px-6 py-4 text-left font-bold uppercase tracking-tighter border-r border-slate-800">Vuelta MAD</th>
+                                <th class="px-6 py-4 text-right font-bold uppercase tracking-tighter border-r border-slate-800">Precio/Pers</th>
+                                <th class="px-6 py-4 text-right font-bold uppercase tracking-tighter border-r border-slate-800">Hotel 4*</th>
+                                <th class="px-6 py-4 text-center font-bold uppercase tracking-tighter border-r border-slate-800">Escala</th>
+                                <th class="px-6 py-4 text-center font-bold uppercase tracking-tighter">Reservar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dest-body" class="divide-y divide-slate-700 text-slate-300">
+                            </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div class="mb-12 bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
-            <iframe src="https://www.google.com/maps/d/embed?mid=1jdZa06yL7cAbi03SUmNc3t-NMBeznbM&ehbc=2E312F" width="100%" height="450" style="border:0;" allowfullscreen loading="lazy"></iframe>
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 border-cyan-500">
+                    <h3 class="text-lg font-bold text-slate-100 mb-3 flex items-center gap-2"><span class="text-2xl">✈️</span> Links de Skyscanner</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">Al abrir el link, verás todas las opciones de aerolíneas disponibles. He seleccionado los horarios que ofrecen la mejor combinación de precio y tiempo de escala. Solo tendrás que clicar en "Ver vuelo" para finalizar la compra.</p>
+                </div>
+                <div class="bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 border-amber-500">
+                    <h3 class="text-lg font-bold text-slate-100 mb-3 flex items-center gap-2"><span class="text-2xl">🧳</span> Cálculo del Equipaje</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">El precio incluye un suplemento real de unos 75 € por persona (ida y vuelta) para asegurar una maleta de 20 kg. Verificad al comprar que seleccionáis la tarifa "Plus" o "Economy Standard".</p>
+                </div>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12" id="voting-grid"></div>
+            <div class="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl shadow-xl p-6 mb-12 border border-slate-600">
+                <h3 class="text-lg font-bold text-slate-100 mb-3 flex items-center gap-2"><span class="text-2xl">🏨</span> Alojamiento</h3>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed">Los precios de 4 estrellas en los Balcanes (Serbia, Bosnia, Bulgaria) son extremadamente competitivos, permitiéndonos un lujo muy alto por poco dinero.</p>
+            </div>
 
-        <div class="bg-slate-800 rounded-[40px] p-8 border-4 border-amber-600 shadow-2xl mb-20">
-            <h2 class="text-3xl font-black text-center mb-8 uppercase italic text-white">🏆 Ranking Global</h2>
-            <div id="ranking-container" class="space-y-4"></div>
-        </div>
+            <div class="mb-12 bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
+                <div class="bg-slate-900 px-6 py-4 border-b border-amber-500 font-bold text-center uppercase italic text-white tracking-widest">🗺️ Mapa de los 10 Destinos (Marcas Propias)</div>
+                <div class="w-full h-[500px]">
+                    <iframe src="https://www.google.com/maps/d/embed?mid=1jdZa06yL7cAbi03SUmNc3t-NMBeznbM&ehbc=2E312F" width="100%" height="500" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="bg-slate-900 px-6 py-4 border-t border-slate-700 text-center">
+                    <p class="text-sm text-slate-400 italic">📍 Todos los destinos marcados para visualización directa</p>
+                </div>
+            </div>
+
+            <div id="voting-section" class="mb-16 bg-gradient-to-br from-slate-800 to-slate-700 rounded-3xl shadow-2xl p-8 border border-slate-600">
+                <h2 class="text-3xl font-black text-center mb-10 uppercase italic text-white tracking-widest">📋 Panel de Votación para las 4</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="voting-grid">
+                    </div>
+            </div>
+
+            <div class="bg-slate-900 rounded-[40px] p-10 border-4 border-amber-500 shadow-2xl relative">
+                <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 px-8 py-2 rounded-full font-black uppercase italic tracking-widest shadow-xl">
+                    Votos en Tiempo Real
+                </div>
+                <h2 class="text-4xl font-black text-center mb-12 uppercase italic text-white tracking-tighter">🏆 Ranking Matemático de Pibones</h2>
+                <div id="ranking-container" class="space-y-6">
+                    </div>
+            </div>
+        </main>
+
+        <footer class="bg-slate-950 text-white px-6 py-12 mt-12 border-t border-slate-800 text-center">
+            <p class="text-xl font-bold mb-2 uppercase italic tracking-widest">Premio Destino de Vacaciones para 4 Pibones</p>
+            <p class="text-sm text-slate-500">¡Que gane el mejor destino! ✨</p>
+        </footer>
     </div>
 
     <script>
         const DESTINATIONS = [
-            { id: 0, n: 'Belgrado', f: '🇷🇸', c: 'Serbia', d: 'En el corazón de los Balcanes, ideal para vida nocturna.', p: '165€', u: 'https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4' },
-            { id: 1, n: 'Sofía', f: '🇧🇬', c: 'Bulgaria', d: 'Una de las capitales más antiguas, a los pies de la montaña Vitosha.', p: '138€', u: 'https://www.skyscanner.es/transport/vuelos/mad/sof/260702/260715/?adults=4' },
-            { id: 2, n: 'Bucarest', f: '🇷🇴', c: 'Rumanía', d: 'El "París del Este", con una arquitectura impresionante.', p: '168€', u: 'https://www.skyscanner.es/transport/vuelos/mad/otp/260702/260714/?adults=4' },
-            { id: 3, n: 'Tirana', f: '🇦🇱', c: 'Albania', d: 'Colorida, moderna y muy cerca de playas espectaculares.', p: '175€', u: 'https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4' },
-            { id: 4, n: 'Cluj-Napoca', f: '🇷🇴', c: 'Rumanía', d: 'La capital de Transilvania, joven y universitaria.', p: '192€', u: 'https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4' },
-            { id: 5, n: 'Split', f: '🇭🇷', c: 'Croacia', d: 'Ciudad costera vibrante construida alrededor de un palacio romano.', p: '225€', u: 'https://www.skyscanner.es/transport/vuelos/mad/spu/260702/260714/?adults=4' },
-            { id: 6, n: 'Dubrovnik', f: '🇭🇷', c: 'Croacia', d: '"La Perla del Adriático", famosa por sus murallas y el mar.', p: '215€', u: 'https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4' },
-            { id: 7, n: 'Sarajevo', f: '🇧🇦', c: 'Bosnia', d: 'Cruce de culturas entre Oriente y Occidente.', p: '240€', u: 'https://www.skyscanner.es/transport/vuelos/mad/sjj/260702/260714/?adults=4' },
-            { id: 8, n: 'Skopie', f: '🇲🇰', c: 'Macedonia', d: 'Ciudad de estatuas y puentes históricos.', p: '210€', u: 'https://www.skyscanner.es/transport/vuelos/mad/skp/260702/260715/?adults=4' },
-            { id: 9, n: 'Malta', f: '🇲🇹', c: 'Malta', d: 'Una isla mediterránea completa con historia, sol y fiesta.', p: '308€', u: 'https://www.skyscanner.es/transport/vuelos/mad/mla/260702/260715/?adults=4' }
+            { id: 0, name: 'Belgrado', country: 'Serbia', flag: '🇷🇸', desc: 'En el corazón de los Balcanes, ideal para vida nocturna.', out: '22:20 (2 Jul)', in: '18:00 (14 Jul)', p: '165 €', h: '27,00 €', direct: true, url: 'https://www.skyscanner.es/transport/vuelos/mad/beg/260702/260714/?adults=4' },
+            { id: 1, name: 'Sofía', country: 'Bulgaria', flag: '🇧🇬', desc: 'Una de las capitales más antiguas, a los pies de la montaña Vitosha.', out: '20:30 (2 Jul)', in: '16:55 (15 Jul)', p: '138 €', h: '33,00 €', direct: true, url: 'https://www.skyscanner.es/transport/vuelos/mad/sof/260702/260715/?adults=4' },
+            { id: 2, name: 'Bucarest', country: 'Rumanía', flag: '🇷🇴', desc: 'El "París del Este", con una arquitectura impresionante.', out: '19:10 (2 Jul)', in: '06:10 (14 Jul)', p: '168 €', h: '20,00 €', direct: true, url: 'https://www.skyscanner.es/transport/vuelos/mad/otp/260702/260714/?adults=4' },
+            { id: 3, name: 'Tirana', country: 'Albania', flag: '🇦🇱', desc: 'Colorida, moderna y muy cerca de playas espectaculares.', out: '22:40 (2 Jul)', in: '17:20 (14 Jul)', p: '175 €', h: '25,00 €', direct: true, url: 'https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4' },
+            { id: 4, name: 'Cluj-Napoca', country: 'Rumanía', flag: '🇷🇴', desc: 'La capital de Transilvania, joven y universitaria.', out: '20:50 (2 Jul)', in: '06:10 (15 Jul)', p: '192 €', h: '20,00 €', direct: true, url: 'https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4' },
+            { id: 5, name: 'Split', country: 'Croacia', flag: '🇭🇷', desc: 'Ciudad costera vibrante construida alrededor de un palacio romano.', out: '11:30 (2 Jul)', in: '14:10 (14 Jul)', p: '225 €', h: '80,00 €', direct: false, stop: '1h 05m', url: 'https://www.skyscanner.es/transport/vuelos/mad/spu/260702/260714/?adults=4' },
+            { id: 6, name: 'Dubrovnik', country: 'Croacia', flag: '🇭🇷', desc: '"La Perla del Adriático", famosa por sus murallas y el mar.', out: '11:30 (2 Jul)', in: '06:15 (15 Jul)', p: '215 €', h: '95,00 €', direct: false, stop: '35m', url: 'https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4' },
+            { id: 7, name: 'Sarajevo', country: 'Bosnia', flag: '🇧🇦', desc: 'Cruce de culturas entre Oriente y Occidente.', out: '06:05 (2 Jul)', in: '12:10 (14 Jul)', p: '240 €', h: '21,00 €', direct: false, stop: '1h 20m', url: 'https://www.skyscanner.es/transport/vuelos/mad/sjj/260702/260714/?adults=4' },
+            { id: 8, name: 'Skopie', country: 'Macedonia', flag: '🇲🇰', desc: 'Ciudad de estatuas y puentes históricos.', out: '18:45 (2 Jul)', in: '16:50 (15 Jul)', p: '210 €', h: '38,00 €', direct: false, stop: '2h 45m', url: 'https://www.skyscanner.es/transport/vuelos/mad/skp/260702/260715/?adults=4' },
+            { id: 9, name: 'Malta', country: 'Malta', flag: '🇲🇹', desc: 'Una isla mediterránea completa con historia, sol y fiesta.', out: '09:15 (2 Jul)', in: '11:55 (15 Jul)', p: '308 €', h: '80,00 €', direct: true, url: 'https://www.skyscanner.es/transport/vuelos/mad/mla/260702/260715/?adults=4' }
         ];
 
-        const PLAYERS = ['Elo', 'Abby', 'Cris', 'Ele'];
-        const STORAGE_ID = 'pibones_2026_fixed_v99';
-
-        let state = {
+        const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
+        const DATA_KEY = 'viaje_2026_TOTAL_PERSISTENT_vFinal_REVISADO';
+        
+        let localState = {
             v: { 'Elo': {}, 'Abby': {}, 'Cris': {}, 'Ele': {} },
-            t: { 'Elo': 0, 'Abby': 0, 'Cris': 0, 'Ele': 0 }
+            ts: { 'Elo': 0, 'Abby': 0, 'Cris': 0, 'Ele': 0 }
         };
 
-        function uiStatus(type) {
+        let isSaving = false;
+
+        function setStatus(type) {
             const dot = document.getElementById('status-dot');
             const txt = document.getElementById('status-text');
-            if(type === 'saving') { dot.className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse"; txt.innerText = "Guardando..."; }
-            else if(type === 'ok') { dot.className = "w-3 h-3 rounded-full bg-emerald-500"; txt.innerText = "Sincronizado"; }
-            else { dot.className = "w-3 h-3 rounded-full bg-red-600"; txt.innerText = "Error SDK"; }
+            if(type === 'saving') {
+                dot.className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse";
+                txt.innerText = "Guardando...";
+            } else if (type === 'ok') {
+                dot.className = "w-3 h-3 rounded-full bg-emerald-500";
+                txt.innerText = "Sincronizado";
+            } else {
+                dot.className = "w-3 h-3 rounded-full bg-red-600";
+                txt.innerText = "Error SDK";
+            }
         }
 
-        async function pushData() {
+        async function push() {
             if (!window.dataSdk) return;
-            uiStatus('saving');
+            isSaving = true;
+            setStatus('saving');
             try {
-                await window.dataSdk.set(STORAGE_ID, JSON.parse(JSON.stringify(state)));
-                uiStatus('ok');
-            } catch (e) { uiStatus('err'); }
+                await window.dataSdk.set(DATA_KEY, JSON.parse(JSON.stringify(localState)));
+                setStatus('ok');
+            } catch (e) { setStatus('err'); }
+            finally { isSaving = false; }
         }
 
-        function mergeData(remote) {
+        function merge(remote) {
             if (!remote || !remote.v) return;
-            PLAYERS.forEach(p => {
-                if ((remote.t[p] || 0) > state.t[p]) {
-                    state.v[p] = remote.v[p];
-                    state.t[p] = remote.t[p];
+            TRAVELERS.forEach(t => {
+                if ((remote.ts[t] || 0) > localState.ts[t]) {
+                    localState.v[t] = remote.v[t];
+                    localState.ts[t] = remote.ts[t];
                 }
             });
             render();
         }
 
-        function vote(user, cityId, points) {
-            const votes = state.v[user];
-            if (votes[cityId] === points) { delete votes[cityId]; } 
-            else {
-                for (let id in votes) { if (votes[id] === points) delete votes[id]; }
+        function handleVote(user, cityId, points) {
+            const votes = localState.v[user];
+            if (votes[cityId] === points) {
+                delete votes[cityId];
+            } else {
+                for (let cid in votes) if (votes[cid] === points) delete votes[cid];
                 votes[cityId] = points;
             }
-            state.t[user] = Date.now();
-            render();
-            pushData();
+            localState.ts[user] = Date.now();
+            render(); 
+            push();
         }
 
         function render() {
-            // Tabla
+            // Tabla Completa con frases descriptivas una a una
             document.getElementById('dest-body').innerHTML = DESTINATIONS.map(d => `
-                <tr class="hover:bg-slate-800/50">
-                    <td class="p-5">
-                        <div class="font-bold text-white text-xs uppercase">${d.f} ${d.n}</div>
-                        <span class="desc-text">${d.d}</span>
+                <tr class="hover:bg-slate-700/50 transition-colors">
+                    <td class="px-6 py-6 border-b border-slate-700">
+                        <div class="font-bold text-white uppercase text-sm">${d.flag} ${d.name}</div>
+                        <div class="text-[10px] text-slate-500 font-black tracking-widest uppercase">${d.country}</div>
+                        <span class="desc-text">${d.desc}</span>
                     </td>
-                    <td class="p-5 text-right font-black text-amber-500">${d.p}</td>
-                    <td class="p-5 text-center"><a href="${d.u}" target="_blank" class="bg-amber-600 px-3 py-1 rounded text-[10px] font-bold text-white">LINK</a></td>
+                    <td class="px-6 py-6 border-b border-slate-700 text-xs font-mono text-slate-400">${d.out.split(' ')[0]} ${d.out.split(' ')[1]}</td>
+                    <td class="px-6 py-6 border-b border-slate-700 text-xs font-mono text-slate-400">${d.in.split(' ')[0]} ${d.in.split(' ')[1]}</td>
+                    <td class="px-6 py-6 border-b border-slate-700 text-right font-black text-amber-500 text-lg">${d.p}</td>
+                    <td class="px-6 py-6 border-b border-slate-700 text-right text-slate-300 font-bold">${d.h}</td>
+                    <td class="px-6 py-6 border-b border-slate-700 text-center">
+                        ${d.direct ? '<span class="bg-emerald-900 text-emerald-300 px-2 py-1 rounded text-[10px] border border-emerald-700">Directo</span>' : `<span class="bg-orange-900 text-orange-300 px-2 py-1 rounded text-[10px] border border-orange-700">${d.stop}</span>`}
+                    </td>
+                    <td class="px-6 py-6 border-b border-slate-700 text-center">
+                        <a href="${d.url}" target="_blank" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-black rounded shadow-xl transition-all uppercase tracking-tighter">Vuelo</a>
+                    </td>
                 </tr>`).join('');
 
-            // Paneles
-            const colors = { 'Elo': 'fuchsia-600', 'Abby': 'violet-600', 'Cris': 'cyan-600', 'Ele': 'orange-600' };
-            document.getElementById('voting-grid').innerHTML = PLAYERS.map(p => {
-                const tv = state.v[p]; const used = Object.values(tv);
+            // Paneles de votación atómicos
+            const themes = { 'Elo': 'border-fuchsia-600', 'Abby': 'border-violet-600', 'Cris': 'border-cyan-600', 'Ele': 'border-orange-600' };
+            document.getElementById('voting-grid').innerHTML = TRAVELERS.map(t => {
+                const tv = localState.v[t];
+                const used = Object.values(tv);
                 return `
-                <div class="bg-slate-900 rounded-2xl border-2 border-${colors[p]}/40 overflow-hidden shadow-xl">
-                    <div class="bg-slate-800 p-2 text-center border-b border-${colors[p]}/40 font-black text-[10px] uppercase text-white">${p}</div>
-                    <div class="p-3 space-y-2">
-                        ${DESTINATIONS.map(d => {
-                            const pts = tv[d.id] || 0;
-                            return `
-                            <div class="flex items-center justify-between p-1.5 rounded bg-slate-950 border ${pts ? `border-${colors[p]}` : 'border-slate-800'}">
-                                <span class="text-[9px] font-bold text-slate-300 uppercase">${d.n}</span>
-                                <div class="flex gap-1">
-                                    ${[3, 2, 1].map(num => {
-                                        const active = pts === num; const locked = !active && used.includes(num);
-                                        return `<button class="w-6 h-6 rounded font-black text-[9px] ${active ? `btn-active` : locked ? 'bg-slate-800 text-slate-700' : 'bg-slate-800 text-slate-400'}" onclick="vote('${p}',${d.id},${num})" ${locked ? 'disabled' : ''}>${num}</button>`;
-                                    }).join('')}
-                                </div>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                </div>`;
+                    <div class="bg-slate-900 rounded-3xl border-2 ${themes[t]} overflow-hidden shadow-2xl">
+                        <div class="bg-slate-800 px-4 py-4 border-b ${themes[t]} font-black text-center text-xs text-white uppercase tracking-widest">${t}</div>
+                        <div class="p-4 space-y-3 bg-slate-800/20">
+                            ${DESTINATIONS.map(d => {
+                                const pts = tv[d.id] || 0;
+                                return `
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border ${pts ? themes[t] : 'border-slate-800'} transition-all">
+                                    <span class="text-[10px] font-black text-slate-200 uppercase">${d.name}</span>
+                                    <div class="flex gap-1.5">
+                                        ${[3, 2, 1].map(num => {
+                                            const active = pts === num;
+                                            const locked = !active && used.includes(num);
+                                            return `<button class="w-8 h-8 rounded-lg font-black text-[11px] transition-all ${active ? 'vote-btn-active' : locked ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-slate-800 text-slate-400 hover:text-white'}" onclick="handleVote('${t}',${d.id},${num})" ${locked ? 'disabled' : ''}>${num}</button>`;
+                                        }).join('')}
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
             }).join('');
 
-            // Ranking
-            const scores = {}; DESTINATIONS.forEach(d => scores[d.id] = 0);
-            PLAYERS.forEach(p => Object.entries(state.v[p]).forEach(([cid, v]) => scores[cid] += v));
+            // Ranking Global
+            const scores = {};
+            DESTINATIONS.forEach(d => scores[d.id] = 0);
+            TRAVELERS.forEach(t => Object.entries(localState.v[t]).forEach(([cid, p]) => scores[cid] += p));
             const ranking = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+            
             document.getElementById('ranking-container').innerHTML = ranking.map(([id, pts], i) => {
-                const d = DESTINATIONS.find(x => x.id == id); const win = i === 0 && pts > 0;
+                const d = DESTINATIONS.find(x => x.id == id);
+                const isWinner = i === 0 && pts > 0;
                 return `
-                <div class="flex items-center justify-between p-4 rounded-3xl ${win ? 'winner-crown' : 'bg-slate-950 border border-slate-800'}">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl font-black ${win ? 'text-amber-500' : 'text-slate-700'}">${i+1}.</span>
-                        <span class="text-2xl">${d.f}</span>
-                        <div class="font-bold text-white uppercase text-xs">${d.n}</div>
+                <div class="flex items-center justify-between p-6 rounded-3xl ${isWinner ? 'winner-crown shadow-2xl' : 'bg-slate-950 border border-slate-800'} transition-all transform hover:scale-[1.01]">
+                    <div class="flex items-center gap-6">
+                        <span class="font-black text-3xl min-w-[40px] ${isWinner ? 'text-amber-500' : 'text-slate-700'}">${i+1}</span>
+                        <span class="text-4xl">${d.flag}</span>
+                        <div>
+                            <div class="font-black text-white uppercase text-lg tracking-tighter">${d.name}</div>
+                            <div class="text-xs text-slate-500 font-bold tracking-widest uppercase">${d.country}</div>
+                        </div>
                     </div>
-                    <div class="font-black ${win ? 'text-amber-400' : 'text-slate-500'} text-xl">${pts} pts</div>
+                    <div class="text-right">
+                        <div class="font-black ${isWinner ? 'text-amber-400' : 'text-slate-500'} text-4xl leading-none">${pts}</div>
+                        <div class="text-[10px] font-black uppercase tracking-widest ${isWinner ? 'text-amber-600' : 'text-slate-700'} mt-1">Puntos Totales</div>
+                    </div>
                 </div>`;
             }).join('');
         }
 
         async function init() {
-            // Intento de conexión infinito hasta que dataSdk aparezca
             const checkSdk = setInterval(async () => {
                 if (window.dataSdk) {
                     clearInterval(checkSdk);
-                    uiStatus('ok');
+                    setStatus('ok');
                     try {
-                        const saved = await window.dataSdk.get(STORAGE_ID);
-                        if (saved) mergeData(saved);
-                        window.dataSdk.onUpdate(STORAGE_ID, (val) => mergeData(val));
-                    } catch(e) { uiStatus('err'); }
+                        const cloud = await window.dataSdk.get(DATA_KEY);
+                        if (cloud) merge(cloud);
+                        window.dataSdk.onUpdate(DATA_KEY, (val) => merge(val));
+                    } catch(e) { setStatus('err'); }
                 }
             }, 500);
             render();
