@@ -28,8 +28,8 @@
             <h1 class="text-3xl md:text-5xl font-extrabold uppercase italic tracking-tighter">Premio Destino de Vacaciones para 4 Pibones</h1>
             <p class="text-slate-400 mt-4 max-w-2xl mx-auto italic">Clicad en VER VUELO para acceder directamente a los horarios y fechas seleccionados para las 4.</p>
             <div id="sync-indicator" class="mt-8 inline-flex items-center gap-3 bg-slate-800 px-6 py-2 rounded-full border border-slate-700">
-                <div id="status-dot" class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
-                <span id="status-text" class="text-xs font-mono text-slate-300 uppercase tracking-widest font-bold">Conectando...</span>
+                <div id="status-dot" class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                <span id="status-text" class="text-xs font-mono text-slate-300 uppercase tracking-widest font-bold">Sistema Listo</span>
             </div>
         </header>
 
@@ -75,21 +75,19 @@
             { id: 3, name: 'Tirana', country: 'Albania', flag: '🇦🇱', desc: 'Colorida, moderna y muy cerca de playas espectaculares.', out: '2 Jul / 14 Jul', p: '175 €', h: '25 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/tia/260702/260714/?adults=4' },
             { id: 4, name: 'Cluj-Napoca', country: 'Rumanía', flag: '🇷🇴', desc: 'La capital de Transilvania, joven y universitaria.', out: '2 Jul / 15 Jul', p: '192 €', h: '20 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/clj/260702/260715/?adults=4' },
             { id: 5, name: 'Split', country: 'Croacia', flag: '🇭🇷', desc: 'Ciudad costera vibrante construida alrededor de un palacio romano.', out: '2 Jul / 14 Jul', p: '225 €', h: '80 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/spu/260702/260714/?adults=4' },
-            { id: 6, name: 'Dubrovnik', country: 'Croacia', flag: '🇭🇷', desc: '"La Perla del Adriático", famosa por sus murallas y el mar.', out: '2 Jul / 15 Jul', p: '215 €  ', h: '95 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4' },
+            { id: 6, name: 'Dubrovnik', country: 'Croacia', flag: '🇭🇷', desc: '"La Perla del Adriático", famosa por sus murallas y el mar.', out: '2 Jul / 15 Jul', p: '215 €', h: '95 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/dbv/260702/260715/?adults=4' },
             { id: 7, name: 'Sarajevo', country: 'Bosnia', flag: '🇧🇦', desc: 'Cruce de culturas entre Oriente y Occidente.', out: '2 Jul / 14 Jul', p: '240 €', h: '21 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/sjj/260702/260714/?adults=4' },
             { id: 8, name: 'Skopie', country: 'Macedonia', flag: '🇲🇰', desc: 'Ciudad de estatuas y puentes históricos.', out: '2 Jul / 15 Jul', p: '210 €', h: '38 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/skp/260702/260715/?adults=4' },
             { id: 9, name: 'Malta', country: 'Malta', flag: '🇲🇹', desc: 'Una isla mediterránea completa con historia, sol y fiesta.', out: '2 Jul / 15 Jul', p: '308 €', h: '80 €', url: 'https://www.skyscanner.es/transport/vuelos/mad/mla/260702/260715/?adults=4' }
         ];
 
         const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
-        const DATA_KEY = 'viaje_2026_VOTOS_FIXED_FINAL';
+        const DATA_KEY = 'votos_pibones_vFinal_fix';
         
         let localState = {
             v: { 'Elo': {}, 'Abby': {}, 'Cris': {}, 'Ele': {} },
             ts: { 'Elo': 0, 'Abby': 0, 'Cris': 0, 'Ele': 0 }
         };
-
-        let isPushing = false;
 
         function setStatus(type) {
             const dot = document.getElementById('status-dot');
@@ -97,28 +95,23 @@
             if(type === 'saving') {
                 dot.className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse";
                 txt.innerText = "Guardando...";
-            } else if (type === 'ok') {
+            } else {
                 dot.className = "w-3 h-3 rounded-full bg-emerald-500";
                 txt.innerText = "Sincronizado";
-            } else {
-                dot.className = "w-3 h-3 rounded-full bg-red-600";
-                txt.innerText = "Error SDK";
             }
         }
 
-        async function push() {
-            if (!window.dataSdk || isPushing) return;
-            isPushing = true;
+        async function manualPush() {
+            if (!window.dataSdk) return;
             setStatus('saving');
             try {
                 await window.dataSdk.set(DATA_KEY, JSON.parse(JSON.stringify(localState)));
                 setStatus('ok');
-            } catch (e) { setStatus('err'); }
-            finally { isPushing = false; }
+            } catch (e) { console.error(e); }
         }
 
         function merge(remote) {
-            if (!remote || !remote.v || isPushing) return;
+            if (!remote || !remote.v) return;
             TRAVELERS.forEach(t => {
                 if ((remote.ts[t] || 0) > localState.ts[t]) {
                     localState.v[t] = remote.v[t];
@@ -138,7 +131,6 @@
             }
             localState.ts[user] = Date.now();
             render(); 
-            push();
         }
 
         function render() {
@@ -162,9 +154,9 @@
                 const tv = localState.v[t];
                 const used = Object.values(tv);
                 return `
-                    <div class="bg-slate-900 rounded-3xl border-2 ${themes[t]} overflow-hidden shadow-2xl">
-                        <div class="bg-slate-800 px-4 py-4 border-b ${themes[t]} font-black text-center text-xs text-white uppercase">${t}</div>
-                        <div class="p-4 space-y-3 bg-slate-800/20">
+                    <div class="bg-slate-900 rounded-3xl border-2 ${themes[t]} overflow-hidden shadow-2xl flex flex-col">
+                        <div class="bg-slate-800 px-4 py-4 border-b ${themes[t]} font-black text-center text-xs text-white uppercase tracking-widest">${t}</div>
+                        <div class="p-4 space-y-3 bg-slate-800/20 flex-grow">
                             ${DESTINATIONS.map(d => {
                                 const pts = tv[d.id] || 0;
                                 return `
@@ -180,6 +172,7 @@
                                 </div>`;
                             }).join('')}
                         </div>
+                        <button onclick="manualPush()" class="m-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-lg transition-all uppercase tracking-widest">Guardar mis votos</button>
                     </div>`;
             }).join('');
 
@@ -201,26 +194,19 @@
                             <div class="text-xs text-slate-500 font-bold uppercase">${d.country}</div>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="font-black ${isWinner ? 'text-amber-400' : 'text-slate-500'} text-4xl">${pts}</div>
-                        <div class="text-[10px] font-black uppercase text-slate-700 mt-1">Puntos Totales</div>
-                    </div>
+                    <div class="font-black ${isWinner ? 'text-amber-400' : 'text-slate-500'} text-4xl">${pts} pts</div>
                 </div>`;
             }).join('');
         }
 
         async function init() {
-            const checkSdk = setInterval(async () => {
-                if (window.dataSdk) {
-                    clearInterval(checkSdk);
-                    setStatus('ok');
-                    try {
-                        const cloud = await window.dataSdk.get(DATA_KEY);
-                        if (cloud) merge(cloud);
-                        window.dataSdk.onUpdate(DATA_KEY, (val) => merge(val));
-                    } catch(e) { setStatus('err'); }
-                }
-            }, 500);
+            if (window.dataSdk) {
+                try {
+                    const cloud = await window.dataSdk.get(DATA_KEY);
+                    if (cloud) merge(cloud);
+                    window.dataSdk.onUpdate(DATA_KEY, (val) => merge(val));
+                } catch(e) {}
+            }
             render();
         }
         init();
