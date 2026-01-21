@@ -82,7 +82,7 @@
         ];
 
         const TRAVELERS = ['Elo', 'Abby', 'Cris', 'Ele'];
-        const DATA_KEY = 'votos_pibones_vFinal_fix';
+        const DATA_KEY = 'votos_pibones_vFinal_REVISADO';
         
         let localState = {
             v: { 'Elo': {}, 'Abby': {}, 'Cris': {}, 'Ele': {} },
@@ -189,10 +189,7 @@
                     <div class="flex items-center gap-6">
                         <span class="font-black text-3xl min-w-[40px] ${isWinner ? 'text-amber-500' : 'text-slate-700'}">${i+1}</span>
                         <span class="text-4xl">${d.flag}</span>
-                        <div>
-                            <div class="font-black text-white uppercase text-lg tracking-tighter">${d.name}</div>
-                            <div class="text-xs text-slate-500 font-bold uppercase">${d.country}</div>
-                        </div>
+                        <div><div class="font-black text-white uppercase text-lg tracking-tighter">${d.name}</div><div class="text-xs text-slate-500 font-bold uppercase">${d.country}</div></div>
                     </div>
                     <div class="font-black ${isWinner ? 'text-amber-400' : 'text-slate-500'} text-4xl">${pts} pts</div>
                 </div>`;
@@ -200,13 +197,17 @@
         }
 
         async function init() {
-            if (window.dataSdk) {
-                try {
-                    const cloud = await window.dataSdk.get(DATA_KEY);
-                    if (cloud) merge(cloud);
-                    window.dataSdk.onUpdate(DATA_KEY, (val) => merge(val));
-                } catch(e) {}
-            }
+            const checkSdk = setInterval(async () => {
+                if (window.dataSdk) {
+                    clearInterval(checkSdk);
+                    setStatus('ok');
+                    try {
+                        const cloud = await window.dataSdk.get(DATA_KEY);
+                        if (cloud) merge(cloud);
+                        window.dataSdk.onUpdate(DATA_KEY, (val) => merge(val));
+                    } catch(e) { console.error(e); }
+                }
+            }, 500);
             render();
         }
         init();
