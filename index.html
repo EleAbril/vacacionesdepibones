@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Votación Definitiva Verano 2026</title>
+    <title>Votación Verano 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/_sdk/element_sdk.js"></script>
     <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .winner-crown { border: 2px solid #fbbf24 !important; box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); background: rgba(251, 191, 36, 0.1); }
-        .table-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #fbbf24 #1e293b; }
+        .winner-crown { border: 2px solid #fbbf24 !important; box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .desc-text { display: block; margin-top: 4px; color: #9ca3af; font-style: italic; font-size: 0.75rem; line-height: 1.2; }
         .btn-active { background-color: #fbbf24 !important; color: #0f172a !important; transform: scale(1.1); font-weight: 900; }
     </style>
@@ -19,23 +19,18 @@
 <body class="h-full bg-slate-950">
     <div id="app" class="max-w-7xl mx-auto px-4 py-12">
         <header class="text-center mb-12 border-b-4 border-amber-500 pb-8">
-            <h1 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Viaje Pibones 2026</h1>
-            <div id="sync-ui" class="mt-4 inline-flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-full border border-slate-800">
-                <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></div>
-                <span id="status-text" class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Conectando...</span>
+            <h1 class="text-3xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Viaje Pibones 2026</h1>
+            <div class="mt-4 inline-flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-full border border-slate-800">
+                <div id="status-dot" class="w-3 h-3 rounded-full bg-red-600 animate-pulse"></div>
+                <span id="status-text" class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Sin Conexión</span>
             </div>
         </header>
 
         <div class="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 mb-12 shadow-2xl">
             <div class="table-scroll">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left">
                     <thead class="bg-slate-800 text-slate-400 uppercase text-[10px] font-bold">
-                        <tr>
-                            <th class="p-5">Destino</th>
-                            <th class="p-5">Vuelo</th>
-                            <th class="p-5 text-right">Precio</th>
-                            <th class="p-5 text-center">Enlace</th>
-                        </tr>
+                        <tr><th class="p-5">Destino</th><th class="p-5 text-right">Precio</th><th class="p-5 text-center">Vuelo</th></tr>
                     </thead>
                     <tbody id="dest-body" class="divide-y divide-slate-800"></tbody>
                 </table>
@@ -48,7 +43,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12" id="voting-grid"></div>
 
-        <div class="bg-slate-900 rounded-[40px] p-8 border-4 border-amber-600 shadow-2xl mb-20">
+        <div class="bg-slate-800 rounded-[40px] p-8 border-4 border-amber-600 shadow-2xl mb-20">
             <h2 class="text-3xl font-black text-center mb-8 uppercase italic text-white">🏆 Ranking Global</h2>
             <div id="ranking-container" class="space-y-4"></div>
         </div>
@@ -69,7 +64,7 @@
         ];
 
         const PLAYERS = ['Elo', 'Abby', 'Cris', 'Ele'];
-        const STORAGE_ID = 'viaje_2026_ULTIMATE_SECURE_v1';
+        const STORAGE_ID = 'pibones_2026_fixed_v99';
 
         let state = {
             v: { 'Elo': {}, 'Abby': {}, 'Cris': {}, 'Ele': {} },
@@ -79,21 +74,21 @@
         function uiStatus(type) {
             const dot = document.getElementById('status-dot');
             const txt = document.getElementById('status-text');
-            if(type === 'syncing') { dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"; txt.innerText = "Guardando..."; }
-            else if(type === 'ready') { dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500"; txt.innerText = "Sincronizado"; }
-            else { dot.className = "w-2.5 h-2.5 rounded-full bg-red-500"; txt.innerText = "Error SDK"; }
+            if(type === 'saving') { dot.className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse"; txt.innerText = "Guardando..."; }
+            else if(type === 'ok') { dot.className = "w-3 h-3 rounded-full bg-emerald-500"; txt.innerText = "Sincronizado"; }
+            else { dot.className = "w-3 h-3 rounded-full bg-red-600"; txt.innerText = "Error SDK"; }
         }
 
-        async function save() {
+        async function pushData() {
             if (!window.dataSdk) return;
-            uiStatus('syncing');
+            uiStatus('saving');
             try {
                 await window.dataSdk.set(STORAGE_ID, JSON.parse(JSON.stringify(state)));
-                uiStatus('ready');
-            } catch (e) { uiStatus('error'); }
+                uiStatus('ok');
+            } catch (e) { uiStatus('err'); }
         }
 
-        function merge(remote) {
+        function mergeData(remote) {
             if (!remote || !remote.v) return;
             PLAYERS.forEach(p => {
                 if ((remote.t[p] || 0) > state.t[p]) {
@@ -104,17 +99,16 @@
             render();
         }
 
-        function handleVote(user, cityId, points) {
+        function vote(user, cityId, points) {
             const votes = state.v[user];
-            if (votes[cityId] === points) {
-                delete votes[cityId];
-            } else {
+            if (votes[cityId] === points) { delete votes[cityId]; } 
+            else {
                 for (let id in votes) { if (votes[id] === points) delete votes[id]; }
                 votes[cityId] = points;
             }
             state.t[user] = Date.now();
             render();
-            save();
+            pushData();
         }
 
         function render() {
@@ -123,79 +117,68 @@
                 <tr class="hover:bg-slate-800/50">
                     <td class="p-5">
                         <div class="font-bold text-white text-xs uppercase">${d.f} ${d.n}</div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">${d.c}</div>
                         <span class="desc-text">${d.d}</span>
                     </td>
-                    <td class="p-5 text-[10px] text-slate-400 font-bold uppercase whitespace-nowrap">2 Jul / 15 Jul</td>
                     <td class="p-5 text-right font-black text-amber-500">${d.p}</td>
-                    <td class="p-5 text-center"><a href="${d.u}" target="_blank" class="bg-amber-600 px-3 py-1.5 rounded text-[10px] font-bold text-white shadow-lg uppercase">Vuelo</a></td>
+                    <td class="p-5 text-center"><a href="${d.u}" target="_blank" class="bg-amber-600 px-3 py-1 rounded text-[10px] font-bold text-white">LINK</a></td>
                 </tr>`).join('');
 
-            // Paneles Votación
-            const themes = { 'Elo': 'fuchsia-600', 'Abby': 'violet-600', 'Cris': 'cyan-600', 'Ele': 'orange-600' };
+            // Paneles
+            const colors = { 'Elo': 'fuchsia-600', 'Abby': 'violet-600', 'Cris': 'cyan-600', 'Ele': 'orange-600' };
             document.getElementById('voting-grid').innerHTML = PLAYERS.map(p => {
-                const tv = state.v[p];
-                const used = Object.values(tv);
-                const color = themes[p];
+                const tv = state.v[p]; const used = Object.values(tv);
                 return `
-                    <div class="bg-slate-900 rounded-2xl border-2 border-${color}/40 overflow-hidden shadow-xl">
-                        <div class="bg-slate-800 p-3 text-center border-b border-${color}/40 font-black text-xs uppercase text-white tracking-widest">${p}</div>
-                        <div class="p-4 space-y-2 bg-slate-800/20">
-                            ${DESTINATIONS.map(d => {
-                                const pts = tv[d.id] || 0;
-                                return `
-                                <div class="flex items-center justify-between p-2 rounded bg-slate-950 border ${pts ? `border-${color} bg-slate-800` : 'border-slate-800'}">
-                                    <span class="text-[10px] font-bold text-slate-300 uppercase">${d.n}</span>
-                                    <div class="flex gap-1">
-                                        ${[3, 2, 1].map(num => {
-                                            const active = pts === num;
-                                            const locked = !active && used.includes(num);
-                                            return `<button class="w-7 h-7 rounded font-black text-[10px] transition-all ${active ? `btn-active` : locked ? 'bg-slate-800 text-slate-700 cursor-not-allowed' : 'bg-slate-800 text-slate-400 hover:text-white'}" onclick="handleVote('${p}',${d.id},${num})" ${locked ? 'disabled' : ''}>${num}</button>`;
-                                        }).join('')}
-                                    </div>
-                                </div>`;
-                            }).join('')}
-                        </div>
-                    </div>`;
+                <div class="bg-slate-900 rounded-2xl border-2 border-${colors[p]}/40 overflow-hidden shadow-xl">
+                    <div class="bg-slate-800 p-2 text-center border-b border-${colors[p]}/40 font-black text-[10px] uppercase text-white">${p}</div>
+                    <div class="p-3 space-y-2">
+                        ${DESTINATIONS.map(d => {
+                            const pts = tv[d.id] || 0;
+                            return `
+                            <div class="flex items-center justify-between p-1.5 rounded bg-slate-950 border ${pts ? `border-${colors[p]}` : 'border-slate-800'}">
+                                <span class="text-[9px] font-bold text-slate-300 uppercase">${d.n}</span>
+                                <div class="flex gap-1">
+                                    ${[3, 2, 1].map(num => {
+                                        const active = pts === num; const locked = !active && used.includes(num);
+                                        return `<button class="w-6 h-6 rounded font-black text-[9px] ${active ? `btn-active` : locked ? 'bg-slate-800 text-slate-700' : 'bg-slate-800 text-slate-400'}" onclick="vote('${p}',${d.id},${num})" ${locked ? 'disabled' : ''}>${num}</button>`;
+                                    }).join('')}
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
             }).join('');
 
             // Ranking
-            const scores = {};
-            DESTINATIONS.forEach(d => scores[d.id] = 0);
-            PLAYERS.forEach(p => Object.entries(state.v[p]).forEach(([cityId, val]) => scores[cityId] += val));
+            const scores = {}; DESTINATIONS.forEach(d => scores[d.id] = 0);
+            PLAYERS.forEach(p => Object.entries(state.v[p]).forEach(([cid, v]) => scores[cid] += v));
             const ranking = Object.entries(scores).sort((a,b) => b[1] - a[1]);
-
             document.getElementById('ranking-container').innerHTML = ranking.map(([id, pts], i) => {
-                const d = DESTINATIONS.find(x => x.id == id);
-                const win = i === 0 && pts > 0;
+                const d = DESTINATIONS.find(x => x.id == id); const win = i === 0 && pts > 0;
                 return `
-                <div class="flex items-center justify-between p-5 rounded-3xl ${win ? 'winner-crown bg-amber-500/10' : 'bg-slate-950 border border-slate-800'}">
-                    <div class="flex items-center gap-4">
+                <div class="flex items-center justify-between p-4 rounded-3xl ${win ? 'winner-crown' : 'bg-slate-950 border border-slate-800'}">
+                    <div class="flex items-center gap-3">
                         <span class="text-xl font-black ${win ? 'text-amber-500' : 'text-slate-700'}">${i+1}.</span>
-                        <span class="text-3xl">${d.f}</span>
-                        <div><div class="font-black text-white uppercase text-sm">${d.n}</div><div class="text-[10px] text-slate-500 font-bold uppercase">${d.c}</div></div>
+                        <span class="text-2xl">${d.f}</span>
+                        <div class="font-bold text-white uppercase text-xs">${d.n}</div>
                     </div>
-                    <div class="font-black ${win ? 'text-amber-400' : 'text-slate-500'} text-2xl">${pts} <span class="text-xs uppercase">pts</span></div>
+                    <div class="font-black ${win ? 'text-amber-400' : 'text-slate-500'} text-xl">${pts} pts</div>
                 </div>`;
             }).join('');
         }
 
         async function init() {
-            let attempts = 0;
-            while(!window.dataSdk && attempts < 50) {
-                await new Promise(r => setTimeout(r, 100));
-                attempts++;
-            }
-            if (window.dataSdk) {
-                uiStatus('ready');
-                try {
-                    const saved = await window.dataSdk.get(STORAGE_ID);
-                    if (saved) merge(saved);
-                    window.dataSdk.onUpdate(STORAGE_ID, (val) => merge(val));
-                } catch(e) {}
-            } else {
-                uiStatus('error');
-            }
+            // Intento de conexión infinito hasta que dataSdk aparezca
+            const checkSdk = setInterval(async () => {
+                if (window.dataSdk) {
+                    clearInterval(checkSdk);
+                    uiStatus('ok');
+                    try {
+                        const saved = await window.dataSdk.get(STORAGE_ID);
+                        if (saved) mergeData(saved);
+                        window.dataSdk.onUpdate(STORAGE_ID, (val) => mergeData(val));
+                    } catch(e) { uiStatus('err'); }
+                }
+            }, 500);
             render();
         }
         init();
